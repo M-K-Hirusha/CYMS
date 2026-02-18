@@ -14,7 +14,6 @@ CYMS (Construction Yard Management System) is a web-based system designed to man
 - Stock movements (In / Out / Transfers)
 - Project-based material allocation
 - Role-based access control
-- QR-based inventory tracking
 
 ---
 
@@ -42,6 +41,6 @@ Week 1 – Project Setup & Authentication Module
 
 ## Developer
 
-Hirusha  
+Hirusha Nilupul 
 Final Year Student  
 NSBM Green University
