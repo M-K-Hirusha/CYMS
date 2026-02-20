@@ -1,6 +1,25 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function AppLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [token, setToken] = useState(localStorage.getItem("token"));
+
+  useEffect(() => {
+    setToken(localStorage.getItem("token"));
+  }, [location.pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+
+    setToken(null);
+    navigate("/login");
+  };
+
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <aside
@@ -15,7 +34,14 @@ export default function AppLayout() {
 
         <nav style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <Link to="/dashboard">Dashboard</Link>
-          <Link to="/login">Login</Link>
+
+          {token ? (
+            <button onClick={handleLogout} style={{ cursor: "pointer" }}>
+              Logout
+            </button>
+          ) : (
+            <Link to="/login">Login</Link>
+          )}
         </nav>
       </aside>
 

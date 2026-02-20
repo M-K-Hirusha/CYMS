@@ -5,6 +5,12 @@ import Dashboard from "./pages/Dashboard";
 import AppLayout from "./layouts/AppLayout";
 import ProtectedRoute from "./router/ProtectedRoute";
 
+import AdminDashboard from "./pages/dashboards/AdminDashboard";
+import ManagerDashboard from "./pages/dashboards/ManagerDashboard";
+import StaffDashboard from "./pages/dashboards/StaffDashboard";
+import Unauthorized from "./pages/Unauthorized";
+
+
 export default function App() {
   return (
     <Routes>
@@ -12,6 +18,8 @@ export default function App() {
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
+
 
       <Route
         path="/dashboard"
@@ -21,7 +29,36 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Dashboard />} />
+        <Route index element={<Navigate to="home" replace />} />
+
+        <Route path="home" element={<Dashboard />} />
+
+        <Route
+          path="admin"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="manager"
+          element={
+            <ProtectedRoute allowedRoles={["MANAGER"]}>
+              <ManagerDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="staff"
+          element={
+            <ProtectedRoute allowedRoles={["STAFF"]}>
+              <StaffDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

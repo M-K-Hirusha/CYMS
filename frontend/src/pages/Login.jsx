@@ -3,9 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-console.log("API_BASE:", API_BASE);
-
-
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -17,6 +14,7 @@ export default function Login() {
     setError("");
 
     try {
+      // 1) Login request
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -29,14 +27,37 @@ export default function Login() {
         throw new Error(data.message || "Login failed");
       }
 
+      // Save token
       localStorage.setItem("token", data.token);
-      navigate("/dashboard");
+
+      // 2) Get current user (role) using token
+      const meRes = await fetch(`${API_BASE}/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
+
+      const meData = await meRes.json();
+
+      if (!meRes.ok) {
+        throw new Error(meData.message || "Failed to load user info");
+      }
+
+      const user = meData.user ?? meData;
+
+      // Save role
+      localStorage.setItem("role", user.role);
+
+      // 3) Redirect based on role
+      if (user.role === "ADMIN") navigate("/dashboard/admin");
+      else if (user.role === "MANAGER") navigate("/dashboard/manager");
+      else navigate("/dashboard/staff");
     } catch (err) {
       setError(err.message);
     }
   };
 
-  return (
+    return (
     <div
       style={{
         minHeight: "100vh",
