@@ -75,7 +75,8 @@ exports.login = async (req, res) => {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    const user = await User.findOne({ email: cleanEmail, isActive: true });
+    const user = await User.findOne({ email: cleanEmail, isActive: true })
+    .select("+passwordHash");
     if (!user) return res.status(401).json({ message: "Invalid credentials." });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
@@ -98,3 +99,22 @@ exports.login = async (req, res) => {
     return res.status(500).json({ message: "Server error." });
   }
 };
+
+exports.getMe = async (req, res) => {
+  try {
+    const user = req.user; // set by protect middleware
+
+    return res.json({
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error." });
+  }
+};
+
