@@ -94,7 +94,6 @@ The system now provides a stable foundation for:
 - Stock transactions
 - Material allocation workflows
 
-
 ## Developer
 
 Hirusha Nilupul 
