@@ -13,7 +13,17 @@ exports.createYard = async (req, res) => {
       return res.status(400).json({ message: "type must be MAIN or SITE" });
     }
 
-    const yard = await Yard.create({ name, type });
+    // Default locations (consistent across system)
+    const defaultLocations =
+      type === "MAIN"
+        ? [{ name: "Main Store", code: "MAIN_STORE", isActive: true }]
+        : [{ name: "Site Store", code: "SITE_STORE", isActive: true }];
+
+    const yard = await Yard.create({
+      name,
+      type,
+      locations: defaultLocations,
+    });
 
     return res.status(201).json({
       message: "Yard created successfully",
