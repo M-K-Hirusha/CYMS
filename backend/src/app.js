@@ -6,6 +6,8 @@ const authRoutes = require("./routes/auth.routes");
 const testRoutes = require("./routes/test.routes");
 const userRoutes = require("./routes/user.routes");
 const yardRoutes = require("./routes/yard.routes");
+const materialRoutes = require("./routes/material.routes");
+const inventoryRoutes = require("./routes/inventory.routes");
 
 
 const app = express();
@@ -26,7 +28,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/yards", yardRoutes);
-
+app.use("/api/materials", materialRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 app.get("/", (req, res) => {
   res.send("CYMS API is running");
