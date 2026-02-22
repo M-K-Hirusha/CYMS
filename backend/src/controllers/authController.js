@@ -5,7 +5,11 @@ const User = require("../models/User");
 
 const signToken = (user) => {
   return jwt.sign(
-    { sub: user._id.toString(), role: user.role },
+    {
+      sub: user._id.toString(),
+      role: user.role,
+      assignedYard: user.assignedYard ? user.assignedYard.toString() : null,
+    },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
   );
@@ -85,15 +89,16 @@ exports.login = async (req, res) => {
     const token = signToken(user);
 
     return res.json({
-      message: "Login successful.",
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-      },
-    });
+    message: "Login successful.",
+    token,
+    user: {
+    id: user._id,
+    fullName: user.fullName,
+    email: user.email,
+    role: user.role,
+    assignedYard: user.assignedYard ?? null,
+  },
+});
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error." });
@@ -102,14 +107,16 @@ exports.login = async (req, res) => {
 
 exports.getMe = async (req, res) => {
   try {
-    const user = req.user; // set by protect middleware
+    const me = await User.findById(req.user.id).select("-passwordHash");
+    if (!me) return res.status(404).json({ message: "User not found." });
 
     return res.json({
       user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
+        id: me._id,
+        fullName: me.fullName,
+        email: me.email,
+        role: me.role,
+        assignedYard: me.assignedYard ?? null,
       },
     });
   } catch (err) {

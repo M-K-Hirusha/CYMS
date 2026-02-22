@@ -15,10 +15,14 @@ module.exports = (req, res, next) => {
     req.user = {
       id: decoded.sub,
       role: decoded.role,
+      assignedYard: decoded.assignedYard || null,
     };
 
-    next();
+    return next();
   } catch (err) {
-    return res.status(401).json({ message: "Invalid or expired token." });
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token expired." });
+    }
+    return res.status(401).json({ message: "Invalid token." });
   }
 };
