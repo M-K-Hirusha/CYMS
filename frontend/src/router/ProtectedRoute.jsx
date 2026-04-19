@@ -4,6 +4,8 @@ export default function ProtectedRoute({ children, allowedRoles }) {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
+  console.log("ProtectedRoute check:", { token: !!token, role, path: window.location.pathname });
+
   // Not logged in
   if (!token) {
     return <Navigate to="/login" replace />;
