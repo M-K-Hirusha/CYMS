@@ -17,10 +17,12 @@ const signToken = (user) => {
 
 exports.register = async (req, res) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, role, assignedYard } = req.body;
 
     if (!fullName || !email || !password) {
-      return res.status(400).json({ message: "fullName, email, password are required." });
+      return res
+        .status(400)
+        .json({ message: "fullName, email, password are required." });
     }
 
     const cleanEmail = email.toLowerCase().trim();
@@ -30,7 +32,9 @@ exports.register = async (req, res) => {
     }
 
     if (password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters." });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 8 characters." });
     }
 
     const existing = await User.findOne({ email: cleanEmail });
@@ -38,15 +42,29 @@ exports.register = async (req, res) => {
       return res.status(409).json({ message: "Email already registered." });
     }
 
+    // ✅ Bootstrap rule:
+    // If this is the first user in the system, allow SYSTEM_ADMIN creation.
+   const userCount = await User.countDocuments();
+
+    if (userCount > 0) {
+    return res.status(403).json({
+      message: "Public registration is disabled. Contact system administrator.",
+    });
+    }
+
+    // Only first user allowed
+    const finalRole = "SYSTEM_ADMIN";
+
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
     const user = await User.create({
-      fullName: fullName.trim(),
-      email: cleanEmail,
-      passwordHash,
-      role: "STAFF",
-    });
+    fullName: fullName.trim(),
+    email: cleanEmail,
+    passwordHash,
+    role: finalRole,
+    assignedYard: null,
+  });
 
     const token = signToken(user);
 
@@ -58,6 +76,7 @@ exports.register = async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
+        assignedYard: user.assignedYard ?? null,
       },
     });
   } catch (err) {

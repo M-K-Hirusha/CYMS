@@ -7,8 +7,11 @@ async function connectDB() {
   }
 
   try {
-    await mongoose.connect(MONGO_URI);
-    console.log(" MongoDB connected");
+    await mongoose.connect(MONGO_URI, {
+      autoIndex: process.env.NODE_ENV !== "production", // build indexes in dev only
+    });
+
+    console.log("MongoDB connected");
   } catch (error) {
     console.error("MongoDB connection failed:", error.message);
     process.exit(1);

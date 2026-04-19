@@ -61,6 +61,15 @@ const materialSchema = new mongoose.Schema(
 // Ensure code is unique (case-insensitive due to uppercase transform)
 materialSchema.index({ code: 1 }, { unique: true });
 
+// Ensure material name is unique (case-insensitive)
+materialSchema.index(
+  { name: 1 },
+  {
+    unique: true,
+    collation: { locale: "en", strength: 2 }, // case-insensitive
+  }
+);
+
 // Optional: nicer API output (hide __v)
 materialSchema.set("toJSON", {
   transform: function (_doc, ret) {

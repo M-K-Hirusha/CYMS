@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const MOVEMENT_TYPES = ["RECEIVE", "ISSUE", "TRANSFER", "ADJUST"];
+const MOVEMENT_TYPES = ["RECEIVE", "ISSUE", "TRANSFER", "ADJUST", "MR_DISPATCH"];
 
 const stockMovementSchema = new mongoose.Schema(
   {
@@ -83,34 +83,53 @@ const stockMovementSchema = new mongoose.Schema(
 
 // Validation rules per movement type
 stockMovementSchema.pre("validate", function () {
+  // RECEIVE
   if (this.type === "RECEIVE") {
     if (!this.toYard || !this.toLocationCode) {
       throw new Error("RECEIVE requires toYard and toLocationCode");
     }
   }
 
+  // ISSUE
   if (this.type === "ISSUE") {
     if (!this.fromYard || !this.fromLocationCode) {
       throw new Error("ISSUE requires fromYard and fromLocationCode");
     }
   }
 
+  // TRANSFER
   if (this.type === "TRANSFER") {
     if (!this.fromYard || !this.fromLocationCode || !this.toYard || !this.toLocationCode) {
-      throw new Error("TRANSFER requires fromYard/fromLocationCode and toYard/toLocationCode");
+      throw new Error(
+        "TRANSFER requires fromYard/fromLocationCode and toYard/toLocationCode"
+      );
     }
   }
 
+  // ADJUST
   if (this.type === "ADJUST") {
-    // adjustment can be + or - but we store qty positive and decide direction via note/refType later
     if (!this.toYard || !this.toLocationCode) {
       throw new Error("ADJUST requires toYard and toLocationCode");
     }
   }
+
+  // MR_DISPATCH
+  if (this.type === "MR_DISPATCH") {
+    if (!this.fromYard || !this.fromLocationCode || !this.toYard || !this.toLocationCode) {
+      throw new Error(
+        "MR_DISPATCH requires fromYard/fromLocationCode and toYard/toLocationCode"
+      );
+    }
+    if (!this.refId) {
+      throw new Error("MR_DISPATCH requires refId (MR document reference)");
+    }
+  }
 });
 
-module.exports =
+const StockMovement =
   mongoose.models.StockMovement ||
   mongoose.model("StockMovement", stockMovementSchema);
 
+module.exports = StockMovement;
+// Export movement types for reuse in controllers/services
 module.exports.MOVEMENT_TYPES = MOVEMENT_TYPES;

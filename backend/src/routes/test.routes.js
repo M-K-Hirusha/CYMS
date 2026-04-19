@@ -4,35 +4,48 @@ const authorizeRoles = require("../middleware/authorizeRoles");
 
 const router = express.Router();
 
-// Any logged-in user
-router.get("/staff", protect, (req, res) => {
+// Any authenticated user
+router.get("/auth", protect, (req, res) => {
   res.json({
-    message: "Staff route - any authenticated user",
+    message: "Authenticated route",
     user: req.user,
   });
 });
 
-// ADMIN or MANAGER
+// SYSTEM_ADMIN only
 router.get(
-  "/manager",
+  "/system",
   protect,
-  authorizeRoles("ADMIN", "MANAGER"),
+  authorizeRoles("SYSTEM_ADMIN"),
   (req, res) => {
     res.json({
-      message: "Manager route - ADMIN or MANAGER only",
+      message: "SYSTEM_ADMIN only route",
       user: req.user,
     });
   }
 );
 
-// ADMIN only
+// HEAD_OFFICE_ADMIN only
 router.get(
-  "/admin",
+  "/ho",
   protect,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("HEAD_OFFICE_ADMIN"),
   (req, res) => {
     res.json({
-      message: "Admin route - ADMIN only",
+      message: "HEAD_OFFICE_ADMIN only route",
+      user: req.user,
+    });
+  }
+);
+
+// SITE roles
+router.get(
+  "/site",
+  protect,
+  authorizeRoles("SITE_ADMIN", "SITE_STAFF"),
+  (req, res) => {
+    res.json({
+      message: "SITE role route",
       user: req.user,
     });
   }

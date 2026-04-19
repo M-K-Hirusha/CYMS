@@ -30,7 +30,7 @@ router.get(
 router.patch(
   "/:id/role",
   protect,
-  authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN"),
+  authorizeRoles("SYSTEM_ADMIN"),
   updateUserRole
 );
 

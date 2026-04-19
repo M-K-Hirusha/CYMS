@@ -23,62 +23,92 @@ async function getNextNumber(name, session) {
    Create MCR (SITE_ADMIN)
 ----------------------------------*/
 exports.createMCR = async (req, res, next) => {
+  const session = await mongoose.startSession();
+
   try {
+    await session.startTransaction();
+
     const { name, unit, description } = req.body;
 
     if (!name || !unit) {
-    return res.status(400).json({ message: "Name and unit are required." });
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: "Name and unit are required." });
     }
 
-    // ✅ Normalize unit to uppercase early
+    const normalizedName = String(name).trim();
     const normalizedUnit = String(unit).trim().toUpperCase();
 
-    // Get SITE_ADMIN yard
     const userId = req.user.id;
 
-    const user = await mongoose.model("User").findById(userId);
+    //  Prefer JWT yard (fast), fallback to DB if missing
+    let assignedYard = req.user.assignedYard;
 
-    if (!user || !user.assignedYard) {
+    if (!assignedYard) {
+      const user = await mongoose.model("User").findById(userId).session(session);
+      assignedYard = user?.assignedYard ? user.assignedYard.toString() : null;
+    }
+
+    if (!assignedYard) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: "User must have assigned SITE yard." });
     }
 
-    const yard = await Yard.findById(user.assignedYard);
+    const yard = await Yard.findById(assignedYard).session(session);
 
     if (!yard || yard.type !== "SITE") {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: "MCR can only be created for SITE yard." });
     }
 
-    // Prevent duplicate active material
+    //  ReDoS-safe exact match (case-insensitive)
+    const escapedName = normalizedName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
     const existingMaterial = await Material.findOne({
-      name: new RegExp(`^${name}$`, "i"),
+      name: new RegExp(`^${escapedName}$`, "i"),
       isActive: true,
-    });
+    }).session(session);
 
     if (existingMaterial) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: "Material already exists." });
     }
 
-    const mcrNo = await getNextNumber("MCR");
+    //  Counter increment inside transaction
+    const mcrNo = await getNextNumber("MCR", session);
 
-    const mcr = await MaterialCreationRequest.create({
-      mcrNo,
-      name,
-      unit, normalizedUnit,
-      description,
-      requestYard: yard._id,
-      requestedBy: userId,
-      history: [
+    const [mcr] = await MaterialCreationRequest.create(
+      [
         {
-          action: "CREATE",
-          by: userId,
-          fromStatus: "",
-          toStatus: "PENDING",
+          mcrNo,
+          name: normalizedName,
+          unit: normalizedUnit,
+          description,
+          requestYard: yard._id,
+          requestedBy: userId,
+          history: [
+            {
+              action: "CREATE",
+              by: userId,
+              fromStatus: "",
+              toStatus: "PENDING",
+            },
+          ],
         },
       ],
-    });
+      { session }
+    );
 
-    res.status(201).json(mcr);
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(201).json(mcr);
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     next(err);
   }
 };
@@ -89,12 +119,20 @@ exports.createMCR = async (req, res, next) => {
 exports.listMCRs = async (req, res, next) => {
   try {
     const role = req.user.role;
-
-    let filter = {};
+    const filter = {};
 
     if (role === "SITE_ADMIN") {
-      const user = await mongoose.model("User").findById(req.user.id);
-      filter.requestYard = user.assignedYard;
+      // Prefer JWT yard (fast), fallback to DB if missing
+      let yardId = req.user.assignedYard;
+
+      if (!yardId) {
+        const user = await mongoose.model("User").findById(req.user.id);
+        yardId = user?.assignedYard ? user.assignedYard.toString() : null;
+      }
+
+      if (!yardId) return res.status(400).json({ message: "User has no assigned yard." });
+
+      filter.requestYard = yardId;
     }
 
     const mcrs = await MaterialCreationRequest.find(filter)
@@ -103,7 +141,7 @@ exports.listMCRs = async (req, res, next) => {
       .populate("decidedBy", "fullName email")
       .sort({ createdAt: -1 });
 
-    res.json(mcrs);
+    return res.json(mcrs);
   } catch (err) {
     next(err);
   }
@@ -120,19 +158,22 @@ exports.getMCRById = async (req, res, next) => {
       .populate("decidedBy", "fullName email")
       .populate("createdMaterialId");
 
-    if (!mcr) {
-      return res.status(404).json({ message: "MCR not found." });
-    }
+    if (!mcr) return res.status(404).json({ message: "MCR not found." });
 
-    // Scope enforcement
+    // ✅ Hardened scope enforcement (no fragile equals + no extra DB call)
     if (req.user.role === "SITE_ADMIN") {
-      const user = await mongoose.model("User").findById(req.user.id);
-      if (!mcr.requestYard.equals(user.assignedYard)) {
+      const yardId = mcr.requestYard?._id
+        ? mcr.requestYard._id.toString()
+        : mcr.requestYard.toString();
+
+      const myYardId = req.user.assignedYard ? req.user.assignedYard.toString() : null;
+
+      if (!myYardId || yardId !== myYardId) {
         return res.status(403).json({ message: "Access denied." });
       }
     }
 
-    res.json(mcr);
+    return res.json(mcr);
   } catch (err) {
     next(err);
   }
@@ -153,25 +194,28 @@ exports.approveMCR = async (req, res, next) => {
     }).session(session);
 
     if (!mcr) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: "MCR not found or already processed." });
     }
-
-    // ✅ Normalize + validate unit against Material schema enum
+    
+    // Validate unit against allowed list (defense in depth)
     const normalizedUnit = String(mcr.unit || "").trim().toUpperCase();
     const allowedUnits = Material.UNITS || [];
 
     if (!allowedUnits.includes(normalizedUnit)) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         message: "Invalid unit for Material creation.",
         errors: [`Unit must be one of: ${allowedUnits.join(", ")}`],
       });
     }
 
-    // ✅ Generate material code using Counter (MAT-2026-0001)
+    // MAT counter in transaction
     const materialCode = await getNextNumber("MAT", session);
 
-    // ✅ Create Material inside transaction
-    const created = await Material.create(
+    const [material] = await Material.create(
       [
         {
           name: mcr.name,
@@ -184,9 +228,7 @@ exports.approveMCR = async (req, res, next) => {
       { session }
     );
 
-    const material = created[0];
-
-    // ✅ Update MCR
+    // Update MCR with decision
     mcr.status = "APPROVED";
     mcr.decidedBy = req.user.id;
     mcr.decidedAt = new Date();
@@ -216,6 +258,7 @@ exports.approveMCR = async (req, res, next) => {
     next(err);
   }
 };
+
 /* --------------------------------
    Reject MCR (HO)
 ----------------------------------*/
@@ -223,18 +266,14 @@ exports.rejectMCR = async (req, res, next) => {
   try {
     const { reason } = req.body;
 
-    if (!reason) {
-      return res.status(400).json({ message: "Rejection reason required." });
-    }
+    if (!reason) return res.status(400).json({ message: "Rejection reason required." });
 
     const mcr = await MaterialCreationRequest.findOne({
       _id: req.params.id,
       status: "PENDING",
     });
 
-    if (!mcr) {
-      return res.status(400).json({ message: "MCR not found or already processed." });
-    }
+    if (!mcr) return res.status(400).json({ message: "MCR not found or already processed." });
 
     mcr.status = "REJECTED";
     mcr.decidedBy = req.user.id;
@@ -251,7 +290,7 @@ exports.rejectMCR = async (req, res, next) => {
 
     await mcr.save();
 
-    res.json({ message: "MCR rejected.", mcr });
+    return res.json({ message: "MCR rejected.", mcr });
   } catch (err) {
     next(err);
   }

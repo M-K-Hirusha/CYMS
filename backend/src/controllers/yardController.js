@@ -1,45 +1,41 @@
-const Yard = require("../models/Yard");
+const yardService = require("../services/yard.service");
 
-// POST /api/yards
-exports.createYard = async (req, res) => {
+// Controller functions for Yard routes
+exports.createYard = async (req, res, next) => {
   try {
-    const { name, type } = req.body;
-
-    if (!name || !type) {
-      return res.status(400).json({ message: "name and type are required" });
-    }
-
-    if (!["MAIN", "SITE"].includes(type)) {
-      return res.status(400).json({ message: "type must be MAIN or SITE" });
-    }
-
-    // Default locations (consistent across system)
-    const defaultLocations =
-      type === "MAIN"
-        ? [{ name: "Main Store", code: "MAIN_STORE", isActive: true }]
-        : [{ name: "Site Store", code: "SITE_STORE", isActive: true }];
-
-    const yard = await Yard.create({
-      name,
-      type,
-      locations: defaultLocations,
-    });
-
+    const yard = await yardService.createYard(req.body);
     return res.status(201).json({
       message: "Yard created successfully",
       yard,
     });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
-// GET /api/yards
-exports.getYards = async (req, res) => {
+// Get all yards (with optional type filter)
+exports.getYards = async (req, res, next) => {
   try {
-    const yards = await Yard.find().sort({ createdAt: -1 });
+    const { type, isActive } = req.query;
+
+    const filter = {};
+    if (type) filter.type = type;
+    if (typeof isActive !== "undefined") filter.isActive = isActive;
+
+    const yards = await yardService.getYards(filter);
+
     return res.json({ yards });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    next(err);
+  }
+};
+
+// Get yard by id
+exports.getYardById = async (req, res, next) => {
+  try {
+    const yard = await yardService.getYardById(req.params.id);
+    return res.json({ yard });
+  } catch (err) {
+    next(err);
   }
 };
