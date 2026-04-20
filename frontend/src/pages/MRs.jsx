@@ -165,22 +165,38 @@ export default function MRs() {
   }
 
   async function handleReject(id) {
-    const ok = window.confirm("Reject this MR?");
-    if (!ok) return;
+    const reason = window.prompt("Enter reject reason:");
+    if (reason === null) return;
+
+    const trimmedReason = reason.trim();
+    if(!trimmedReason) {
+      alert("Reject reason cannot be empty");
+      return;
+    }
 
     try {
       setActionLoadingId(id);
-      await rejectMR(id);
+
+      const payload = {
+      reason: trimmedReason,
+      };
+
+      console.log(
+      "FINAL reject payload JSON:",
+      JSON.stringify(payload, null, 2)
+      );
+
+      await rejectMR(id, payload);
       await loadMRs();
       alert("MR rejected successfully");
-    } catch (err) {
+    }   catch (err) {
       console.error(err);
       alert(err.message || "Reject failed");
-    } finally {
+    }   finally {
       setActionLoadingId(null);
     }
   }
-
+  
   return (
     <div>
       <div

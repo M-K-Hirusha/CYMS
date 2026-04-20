@@ -70,10 +70,11 @@ export async function approveMR(id, payload) {
 // ========================
 // REJECT MR
 // ========================
-export async function rejectMR(id) {
+export async function rejectMR(id, payload) {
   const res = await fetch(`${API_BASE}/api/mrs/${id}/reject`, {
     method: "POST",
     headers: authHeaders(),
+    body: JSON.stringify(payload),
   });
 
   const data = await res.json().catch(() => null);
