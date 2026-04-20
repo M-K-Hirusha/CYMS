@@ -19,6 +19,8 @@ import {
 } from "recharts";
 
 export default function Reports() {
+  const [chartsReady, setChartsReady] = useState(false);
+
   const [toolsSummary, setToolsSummary] = useState(null);
   const [toolsError, setToolsError] = useState("");
   const [toolsLoading, setToolsLoading] = useState(true);
@@ -50,6 +52,10 @@ export default function Reports() {
   const COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"];
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setChartsReady(true);
+    }, 150);
+
     const loadAll = async () => {
       const results = await Promise.allSettled([
         getToolsSummary(),
@@ -96,6 +102,8 @@ export default function Reports() {
     };
 
     loadAll();
+
+    return () => clearTimeout(timer);
   }, []);
 
   const sectionCardStyle = {
@@ -104,6 +112,12 @@ export default function Reports() {
     padding: 16,
     background: "#020617",
     overflow: "hidden",
+  };
+
+  const chartBoxStyle = {
+    width: "100%",
+    height: 250,
+    minHeight: 250,
   };
 
   return (
@@ -132,8 +146,8 @@ export default function Reports() {
             <p>Loading chart...</p>
           ) : toolsError ? (
             <p style={{ color: "#ef4444" }}>{toolsError}</p>
-          ) : toolChartData.length > 0 ? (
-            <div style={{ width: "100%", height: 250 }}>
+          ) : chartsReady && toolChartData.length > 0 ? (
+            <div style={chartBoxStyle}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -166,8 +180,8 @@ export default function Reports() {
             <p>Loading chart...</p>
           ) : mrError ? (
             <p style={{ color: "#ef4444" }}>{mrError}</p>
-          ) : mrChartData.length > 0 ? (
-            <div style={{ width: "100%", height: 250 }}>
+          ) : chartsReady && mrChartData.length > 0 ? (
+            <div style={chartBoxStyle}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={mrChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -247,11 +261,7 @@ export default function Reports() {
 
               {stockSummary.rows?.map((row, index) => (
                 <div
-                  key={`${
-                    row._id.yard?._id || row._id.yard
-                  }-${row._id.locationCode}-${
-                    row._id.material?._id || row._id.material
-                  }-${index}`}
+                  key={`${row._id?.yard?._id || row._id?.yard}-${row._id?.locationCode}-${row._id?.material?._id || row._id?.material}-${index}`}
                   style={{
                     marginBottom: 14,
                     paddingBottom: 14,
@@ -261,17 +271,17 @@ export default function Reports() {
                   <p>
                     Yard:{" "}
                     <strong>
-                      {row._id.yard?.name || row._id.yard?.code || "N/A"}
+                      {row._id?.yard?.name || row._id?.yard?.code || "N/A"}
                     </strong>
                   </p>
                   <p>
-                    Location: <strong>{row._id.locationCode || "N/A"}</strong>
+                    Location: <strong>{row._id?.locationCode || "N/A"}</strong>
                   </p>
                   <p>
                     Material:{" "}
                     <strong>
-                      {row._id.material?.name ||
-                        row._id.material?.code ||
+                      {row._id?.material?.name ||
+                        row._id?.material?.code ||
                         "N/A"}
                     </strong>
                   </p>
