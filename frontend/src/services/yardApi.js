@@ -21,3 +21,31 @@ export async function getMainYards() {
 
   return data;
 }
+
+export async function getSiteYards() {
+  const res = await fetch(`${API_BASE}/api/yards?type=SITE`, {
+    headers: authHeaders(),
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to load SITE yards");
+  }
+
+  return data;
+}
+
+export async function getAllYards() {
+  const res = await fetch(`${API_BASE}/api/yards`, {
+    headers: authHeaders(),
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to load yards");
+  }
+
+  return data;
+}

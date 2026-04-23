@@ -183,7 +183,11 @@ async function listTools(user, query = {}) {
   const skip = (page - 1) * limit;
 
   const [items, total] = await Promise.all([
-    Tool.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(limit),
+    Tool.find(filter)
+    .populate("currentYard", "name code")
+    .sort({ updatedAt: -1 })
+    .skip(skip)
+    .limit(limit),
     Tool.countDocuments(filter),
   ]);
 
@@ -457,6 +461,75 @@ async function transferTool(toolId, data, user) {
   }
 }
 
+// Update tool status (MAINTENANCE / RETIRED)
+async function updateToolStatus(toolId, data, user) {
+  const session = await mongoose.startSession();
+
+  try {
+    await session.startTransaction();
+
+    const { status, note } = data || {};
+
+    if (!status) {
+      throw new AppError(400, "status is required", "VALIDATION_ERROR");
+    }
+
+    const allowed = ["AVAILABLE", "MAINTENANCE", "RETIRED"];
+    if (!allowed.includes(status)) {
+      throw new AppError(400, "Invalid status", "INVALID_STATUS");
+    }
+
+    const tool = await Tool.findById(toolId).session(session);
+    if (!tool) throw new AppError(404, "Tool not found", "TOOL_NOT_FOUND");
+
+    if (tool.isActive === false) {
+      throw new AppError(400, "Tool is inactive", "TOOL_INACTIVE");
+    }
+
+    // Scope check
+    assertScope(user, tool.currentYard, tool.currentYard);
+
+    // IMPORTANT RULE
+    if (tool.status === "ISSUED") {
+      throw new AppError(
+        400,
+        "Cannot change status while tool is issued",
+        "INVALID_STATE"
+      );
+    }
+
+    const previousStatus = tool.status;
+
+    tool.status = status;
+    await tool.save({ session });
+
+    await ToolMovement.create(
+      [
+        {
+          tool: tool._id,
+          type: "STATUS_CHANGE",
+          fromYard: tool.currentYard,
+          toYard: tool.currentYard,
+          fromLocationCode: tool.currentLocationCode,
+          toLocationCode: tool.currentLocationCode,
+          performedBy: user.id,
+          note:
+            note || `Status changed from ${previousStatus} → ${status}`,
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+    return tool;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
+}
+
 module.exports = {
   normalizeLocation,
   ensureActiveLocation,
@@ -468,5 +541,6 @@ module.exports = {
   getMovements,
   issueTool,
   returnTool,
-  transferTool
+  transferTool,
+  updateToolStatus,
 };

@@ -6,6 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Unauthorized from "../pages/Unauthorized";
 import Reports from "../pages/Reports";
 import MRs from "../pages/MRs";
+import Tools from "../pages/Tools";
 
 export default function AppRouter() {
   return (
@@ -40,6 +41,15 @@ export default function AppRouter() {
             element={
               <ProtectedRoute>
                 <MRs />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/tools"
+            element={
+              <ProtectedRoute>
+                <Tools />
               </ProtectedRoute>
             }
           />

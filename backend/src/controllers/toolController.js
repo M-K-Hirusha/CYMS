@@ -74,3 +74,20 @@ exports.transferTool = async (req, res, next) => {
     return next(err);
   }
 };
+
+exports.updateToolStatus = async (req, res, next) => {
+  try {
+    const tool = await toolService.updateToolStatus(
+      req.params.id,
+      req.body,
+      req.user
+    );
+
+    return res.status(200).json({
+      message: "Tool status updated",
+      tool,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};

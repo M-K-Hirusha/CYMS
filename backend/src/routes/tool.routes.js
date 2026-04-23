@@ -36,23 +36,32 @@ router.get(
   toolController.getMovements
 );
 
-// issue / return / transfer
+// issue
 router.post(
   "/:id/issue",
   authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN", "SITE_STAFF"),
   toolController.issueTool
 );
 
+// return
 router.post(
   "/:id/return",
   authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN", "SITE_STAFF"),
   toolController.returnTool
 );
 
+// transfer
 router.post(
   "/:id/transfer",
   authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN", "SITE_STAFF"),
   toolController.transferTool
+);
+
+// status
+router.post(
+  "/:id/status",
+  authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN"),
+  toolController.updateToolStatus
 );
 
 module.exports = router;
