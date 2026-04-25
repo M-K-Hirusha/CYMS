@@ -66,20 +66,38 @@ export default function Reports() {
 
       const [tools, mr, stock, movements] = results;
 
-      if (tools.status === "fulfilled") setToolsSummary(tools.value);
-      else setToolsError(tools.reason?.message || "Failed to load tools summary");
+      if (tools.status === "fulfilled") {
+        setToolsSummary(tools.value);
+        setToolsError("");
+      } else {
+        setToolsError(tools.reason?.message || "Failed to load tools summary");
+      }
       setToolsLoading(false);
 
-      if (mr.status === "fulfilled") setMRSummary(mr.value);
-      else setMRError(mr.reason?.message || "Failed to load MR summary");
+      if (mr.status === "fulfilled") {
+        setMRSummary(mr.value);
+        setMRError("");
+      } else {
+        setMRError(mr.reason?.message || "Failed to load MR summary");
+      }
       setMRLoading(false);
 
-      if (stock.status === "fulfilled") setStockSummary(stock.value);
-      else setStockError(stock.reason?.message || "Failed to load stock summary");
+      if (stock.status === "fulfilled") {
+        setStockSummary(stock.value);
+        setStockError("");
+      } else {
+        setStockError(stock.reason?.message || "Failed to load stock summary");
+      }
       setStockLoading(false);
 
-      if (movements.status === "fulfilled") setToolMovements(movements.value);
-      else setMovementsError(movements.reason?.message || "Failed to load tool movements");
+      if (movements.status === "fulfilled") {
+        setToolMovements(movements.value);
+        setMovementsError("");
+      } else {
+        setMovementsError(
+          movements.reason?.message || "Failed to load tool movements"
+        );
+      }
       setMovementsLoading(false);
     }
 
@@ -112,7 +130,10 @@ export default function Reports() {
     return stockRows.filter((row) => {
       const yard = row._id?.yard?.name || row._id?.yard?.code || "";
       const location = row._id?.locationCode || "";
-      const material = row._id?.material?.name || row._id?.material?.code || "";
+      const material =
+        row._id?.material?.name ||
+        row._id?.material?.code ||
+        "Deleted Material";
       const code = row._id?.material?.code || "";
 
       return (
@@ -124,7 +145,8 @@ export default function Reports() {
     });
   }, [stockRows, stockSearch]);
 
-  const stockTotalPages = Math.ceil(filteredStockRows.length / stockPageSize) || 1;
+  const stockTotalPages =
+    Math.ceil(filteredStockRows.length / stockPageSize) || 1;
 
   const paginatedStockRows = filteredStockRows.slice(
     (stockPage - 1) * stockPageSize,
@@ -139,17 +161,13 @@ export default function Reports() {
     }
 
     const q = movementSearch.trim().toLowerCase();
-
     if (!q) return data;
 
     return data.filter((row) => {
-      const tool = row.tool?.name || row.tool?.code || row.tool?._id || row.tool || "";
+      const tool =
+        row.tool?.name || row.tool?.code || row.tool?._id || row.tool || "";
 
-      const from = [
-        row.fromYard?.name,
-        row.fromYard?.code,
-        row.fromLocationCode,
-      ]
+      const from = [row.fromYard?.name, row.fromYard?.code, row.fromLocationCode]
         .filter(Boolean)
         .join(" ");
 
@@ -222,21 +240,42 @@ export default function Reports() {
           Reports & Analytics
         </h1>
         <p style={{ margin: "10px 0 0", color: "#94a3b8" }}>
-          View tools summary, MR summary, stock summary, and tool movement analytics.
+          View tools summary, MR summary, stock summary, and tool movement
+          analytics.
         </p>
       </div>
 
       <div style={topGridStyle}>
-        <KpiCard label="Total Tools" value={toolsLoading ? "..." : toolsCounts.total} />
-        <KpiCard label="Available" value={toolsLoading ? "..." : toolsCounts.available} color="#4ade80" />
-        <KpiCard label="Issued" value={toolsLoading ? "..." : toolsCounts.issued} color="#fbbf24" />
-        <KpiCard label="Maintenance" value={toolsLoading ? "..." : toolsCounts.maintenance} color="#60a5fa" />
-        <KpiCard label="Retired" value={toolsLoading ? "..." : toolsCounts.retired} color="#f87171" />
+        <KpiCard
+          label="Total Tools"
+          value={toolsLoading ? "..." : toolsCounts.total}
+        />
+        <KpiCard
+          label="Available"
+          value={toolsLoading ? "..." : toolsCounts.available}
+          color="#4ade80"
+        />
+        <KpiCard
+          label="Issued"
+          value={toolsLoading ? "..." : toolsCounts.issued}
+          color="#fbbf24"
+        />
+        <KpiCard
+          label="Maintenance"
+          value={toolsLoading ? "..." : toolsCounts.maintenance}
+          color="#60a5fa"
+        />
+        <KpiCard
+          label="Retired"
+          value={toolsLoading ? "..." : toolsCounts.retired}
+          color="#f87171"
+        />
       </div>
 
       <div style={chartGridStyle}>
         <div style={sectionCardStyle}>
           <h3 style={sectionTitleStyle}>Tools Status</h3>
+
           {toolsLoading ? (
             <p>Loading chart...</p>
           ) : toolsError ? (
@@ -245,7 +284,13 @@ export default function Reports() {
             <div style={chartBoxStyle}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={toolChartData} dataKey="value" nameKey="name" outerRadius={85} label>
+                  <Pie
+                    data={toolChartData}
+                    dataKey="value"
+                    nameKey="name"
+                    outerRadius={85}
+                    label
+                  >
                     {toolChartData.map((_, index) => (
                       <Cell key={index} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -261,6 +306,7 @@ export default function Reports() {
 
         <div style={sectionCardStyle}>
           <h3 style={sectionTitleStyle}>MR Status</h3>
+
           {mrLoading ? (
             <p>Loading chart...</p>
           ) : mrError ? (
@@ -284,7 +330,11 @@ export default function Reports() {
       </div>
 
       <div style={summaryGridStyle}>
-        <SummaryCard title="Tools Summary" loading={toolsLoading} error={toolsError}>
+        <SummaryCard
+          title="Tools Summary"
+          loading={toolsLoading}
+          error={toolsError}
+        >
           <SummaryRow label="Total Tools" value={toolsCounts.total} />
           <SummaryRow label="Available" value={toolsCounts.available} />
           <SummaryRow label="Issued" value={toolsCounts.issued} />
@@ -301,7 +351,11 @@ export default function Reports() {
           <FooterButton onClick={() => setShowMRDetails(true)} />
         </SummaryCard>
 
-        <SummaryCard title="Stock Summary" loading={stockLoading} error={stockError}>
+        <SummaryCard
+          title="Stock Summary"
+          loading={stockLoading}
+          error={stockError}
+        >
           <SummaryRow label="Total Quantity" value={stockSummary?.total || 0} />
           <SummaryRow label="Stock Records" value={stockRows.length} />
           <FooterButton onClick={() => setShowStockDetails(true)} />
@@ -313,6 +367,7 @@ export default function Reports() {
           <h3 style={{ ...sectionTitleStyle, marginBottom: 0 }}>
             Tool Movements (Latest)
           </h3>
+
           <button
             type="button"
             onClick={() => setShowMovementsDetails(true)}
@@ -333,7 +388,10 @@ export default function Reports() {
       </div>
 
       {showToolsDetails && (
-        <SimpleModal title="Tools Summary Details" onClose={() => setShowToolsDetails(false)}>
+        <SimpleModal
+          title="Tools Summary Details"
+          onClose={() => setShowToolsDetails(false)}
+        >
           <SummaryRow label="Total Tools" value={toolsCounts.total} />
           {toolsSummary?.rows?.map((row) => (
             <SummaryRow key={row._id} label={row._id} value={row.count} />
@@ -342,7 +400,10 @@ export default function Reports() {
       )}
 
       {showMRDetails && (
-        <SimpleModal title="MR Summary Details" onClose={() => setShowMRDetails(false)}>
+        <SimpleModal
+          title="MR Summary Details"
+          onClose={() => setShowMRDetails(false)}
+        >
           <SummaryRow label="Total MRs" value={mrCounts.total} />
           {mrSummary?.rows?.map((row) => (
             <SummaryRow key={row._id} label={row._id} value={row.count} />
@@ -355,7 +416,11 @@ export default function Reports() {
           <div style={wideDetailsModalStyle}>
             <div style={modalHeaderStyle}>
               <h3 style={modalTitleStyle}>Stock Summary Details</h3>
-              <button type="button" onClick={() => setShowStockDetails(false)} style={closeButtonStyle}>
+              <button
+                type="button"
+                onClick={() => setShowStockDetails(false)}
+                style={closeButtonStyle}
+              >
                 ✕
               </button>
             </div>
@@ -380,7 +445,9 @@ export default function Reports() {
                   page={stockPage}
                   totalPages={stockTotalPages}
                   onPrev={() => setStockPage((p) => Math.max(p - 1, 1))}
-                  onNext={() => setStockPage((p) => Math.min(p + 1, stockTotalPages))}
+                  onNext={() =>
+                    setStockPage((p) => Math.min(p + 1, stockTotalPages))
+                  }
                 />
               </>
             ) : (
@@ -388,7 +455,11 @@ export default function Reports() {
             )}
 
             <div style={modalFooterStyle}>
-              <button type="button" onClick={() => setShowStockDetails(false)} style={detailsButtonStyle}>
+              <button
+                type="button"
+                onClick={() => setShowStockDetails(false)}
+                style={detailsButtonStyle}
+              >
                 Close
               </button>
             </div>
@@ -401,7 +472,11 @@ export default function Reports() {
           <div style={wideDetailsModalStyle}>
             <div style={modalHeaderStyle}>
               <h3 style={modalTitleStyle}>Tool Movements Details</h3>
-              <button type="button" onClick={() => setShowMovementsDetails(false)} style={closeButtonStyle}>
+              <button
+                type="button"
+                onClick={() => setShowMovementsDetails(false)}
+                style={closeButtonStyle}
+              >
                 ✕
               </button>
             </div>
@@ -442,7 +517,9 @@ export default function Reports() {
                   totalPages={movementTotalPages}
                   onPrev={() => setMovementPage((p) => Math.max(p - 1, 1))}
                   onNext={() =>
-                    setMovementPage((p) => Math.min(p + 1, movementTotalPages))
+                    setMovementPage((p) =>
+                      Math.min(p + 1, movementTotalPages)
+                    )
                   }
                 />
               </>
@@ -451,7 +528,11 @@ export default function Reports() {
             )}
 
             <div style={modalFooterStyle}>
-              <button type="button" onClick={() => setShowMovementsDetails(false)} style={detailsButtonStyle}>
+              <button
+                type="button"
+                onClick={() => setShowMovementsDetails(false)}
+                style={detailsButtonStyle}
+              >
                 Close
               </button>
             </div>
@@ -475,7 +556,13 @@ function SummaryCard({ title, loading, error, children }) {
   return (
     <div style={compactSummaryCardStyle}>
       <h3 style={sectionTitleStyle}>{title}</h3>
-      {loading ? <p>Loading...</p> : error ? <p style={{ color: "#ef4444" }}>{error}</p> : children}
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p style={{ color: "#ef4444" }}>{error}</p>
+      ) : (
+        children
+      )}
     </div>
   );
 }
@@ -537,17 +624,29 @@ function StockTable({ rows }) {
         </thead>
 
         <tbody>
-          {rows.map((row, index) => (
-            <tr key={`stock-${index}`}>
-              <td style={tdStyle}>{row._id?.yard?.name || row._id?.yard?.code || "N/A"}</td>
-              <td style={tdStyle}>{row._id?.locationCode || "N/A"}</td>
-              <td style={tdStyle}>{row._id?.material?.name || row._id?.material?.code || "N/A"}</td>
-              <td style={tdStyle}>{row._id?.material?.code || "N/A"}</td>
-              <td style={tdStyle}>
-                <strong>{row.qtyOnHand ?? row.qty ?? 0}</strong>
-              </td>
-            </tr>
-          ))}
+          {rows.map((row, index) => {
+            const yardName =
+              row._id?.yard?.name || row._id?.yard?.code || "N/A";
+            const location = row._id?.locationCode || "N/A";
+            const materialName =
+              row._id?.material?.name ||
+              row._id?.material?.code ||
+              "Deleted Material";
+            const materialCode = row._id?.material?.code || "-";
+            const qty = row.qtyOnHand ?? row.qty ?? 0;
+
+            return (
+              <tr key={`stock-${index}`}>
+                <td style={tdStyle}>{yardName}</td>
+                <td style={tdStyle}>{location}</td>
+                <td style={tdStyle}>{materialName}</td>
+                <td style={tdStyle}>{materialCode}</td>
+                <td style={tdStyle}>
+                  <strong>{qty}</strong>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -572,21 +671,31 @@ function MovementsTable({ rows }) {
           {rows.map((row, index) => (
             <tr key={row._id || index}>
               <td style={tdStyle}>
-                <span style={getMovementBadge(row.type)}>{row.type || "N/A"}</span>
+                <span style={getMovementBadge(row.type)}>
+                  {row.type || "N/A"}
+                </span>
               </td>
+
               <td style={tdStyle}>
-                {row.tool?.name || row.tool?.code || row.tool?._id || row.tool || "N/A"}
+                {row.tool?.name ||
+                  row.tool?.code ||
+                  row.tool?._id ||
+                  row.tool ||
+                  "N/A"}
               </td>
+
               <td style={tdStyle}>
                 {[row.fromYard?.name, row.fromYard?.code, row.fromLocationCode]
                   .filter(Boolean)
                   .join(" / ") || "N/A"}
               </td>
+
               <td style={tdStyle}>
                 {[row.toYard?.name, row.toYard?.code, row.toLocationCode]
                   .filter(Boolean)
                   .join(" / ") || "N/A"}
               </td>
+
               <td style={tdStyle}>
                 {row.createdAt ? new Date(row.createdAt).toLocaleString() : "N/A"}
               </td>

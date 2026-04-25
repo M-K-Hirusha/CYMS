@@ -94,6 +94,10 @@ export default function AppLayout() {
             <NavLink to="/tools" style={navLinkStyle}>
               Tools
             </NavLink>
+
+            <NavLink to="/materials" style={navLinkStyle}>
+              Materials
+            </NavLink>
           </nav>
         </div>
 
