@@ -21,7 +21,7 @@ const mrItemSchema = new mongoose.Schema(
     approvedQty: {
       type: Number,
       default: null,
-      min: [0.000001, "approvedQty must be greater than 0"],
+      min: [0, "approvedQty cannot be negative"],
     },
   },
   { _id: false }

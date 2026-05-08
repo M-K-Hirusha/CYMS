@@ -17,8 +17,24 @@ router.post(
 router.get(
   "/",
   protect,
-  authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN"),
+  authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN"),
   yardController.getYards
+);
+
+// Add location to yard
+router.post(
+  "/:id/locations",
+  protect,
+  authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN"),
+  yardController.addYardLocation
+);
+
+// Update yard active status
+router.patch(
+  "/:id/status",
+  protect,
+  authorizeRoles("SYSTEM_ADMIN",),
+  yardController.updateYardStatus
 );
 
 // Get single yard by ID

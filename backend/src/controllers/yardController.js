@@ -22,7 +22,17 @@ exports.getYards = async (req, res, next) => {
     if (type) filter.type = type;
     if (typeof isActive !== "undefined") filter.isActive = isActive;
 
-    const yards = await yardService.getYards(filter);
+    let yards;
+
+    if (req.user.role === "SITE_ADMIN") {
+      // Only return assigned yard
+      yards = await yardService.getYards({
+        ...filter,
+        _id: req.user.assignedYard,
+      });
+    } else {
+      yards = await yardService.getYards(filter);
+    }
 
     return res.json({ yards });
   } catch (err) {
@@ -35,6 +45,41 @@ exports.getYardById = async (req, res, next) => {
   try {
     const yard = await yardService.getYardById(req.params.id);
     return res.json({ yard });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Update yard active status
+exports.updateYardStatus = async (req, res, next) => {
+  try {
+    const { isActive } = req.body;
+
+    const yard = await yardService.updateYardStatus(
+      req.params.id,
+      isActive
+    );
+
+    return res.json({
+      message: yard.isActive
+        ? "Yard activated successfully"
+        : "Yard disabled successfully",
+      yard,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Add location to yard
+exports.addYardLocation = async (req, res, next) => {
+  try {
+    const yard = await yardService.addYardLocation(req.params.id, req.body);
+
+    return res.status(201).json({
+      message: "Location added successfully",
+      yard,
+    });
   } catch (err) {
     next(err);
   }

@@ -228,6 +228,9 @@ async function getMovements(toolId, user, query = {}) {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
+      .populate("tool", "name code status currentYard currentLocationCode currentHolder")
+      .populate("fromYard", "name code type")
+      .populate("toYard", "name code type")
       .populate("performedBy", "fullName role"),
     ToolMovement.countDocuments(filter),
   ]);

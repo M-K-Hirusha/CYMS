@@ -7,38 +7,30 @@ function authHeaders() {
 
   return {
     "Content-Type": "application/json",
-    Authorization: token ? `Bearer ${token}` : "",
+    Authorization: `Bearer ${token}`,
   };
 }
 
-async function handleResponse(res, fallbackMessage) {
-  const data = await res.json().catch(() => null);
+async function handleResponse(res) {
+  const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    console.error(fallbackMessage, data);
-
-    throw new Error(
-      data?.message || data?.error || fallbackMessage
-    );
+    throw new Error(data.message || "Request failed");
   }
 
   return data;
 }
 
-function clearMRCaches() {
-  clearCache("mrs:");
-  clearCache("stock:");
-  clearCache("dashboard:");
-  clearCache("materials:");
-  clearCache("reports:");
+function clearMCRCaches() {
+  clearCache("mcrs:");
 }
 
 /* ========================
-   GET MRs
+   GET MCRs
 ======================== */
 
-export async function getMRs(params = {}) {
-  const cacheKey = `mrs:${JSON.stringify({
+export async function getMCRs(params = {}) {
+  const cacheKey = `mcrs:${JSON.stringify({
     status: params.status || "",
     search: params.search || "",
     page: params.page || "",
@@ -56,7 +48,7 @@ export async function getMRs(params = {}) {
   if (params.page) query.append("page", params.page);
   if (params.limit) query.append("limit", params.limit);
 
-  const url = `${API_BASE}/api/mrs${
+  const url = `${API_BASE}/api/mcrs${
     query.toString() ? `?${query}` : ""
   }`;
 
@@ -64,7 +56,7 @@ export async function getMRs(params = {}) {
     headers: authHeaders(),
   });
 
-  const data = await handleResponse(res, "Failed to load MRs");
+  const data = await handleResponse(res);
 
   setCache(cacheKey, data, 30 * 1000);
 
@@ -72,64 +64,58 @@ export async function getMRs(params = {}) {
 }
 
 /* ========================
-   CREATE MR
+   CREATE MCR
 ======================== */
 
-export async function createMR(payload) {
-  const res = await fetch(`${API_BASE}/api/mrs`, {
+export async function createMCR(payload) {
+  const res = await fetch(`${API_BASE}/api/mcrs`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(payload),
   });
 
-  const data = await handleResponse(
-    res,
-    "Failed to create MR"
-  );
+  const data = await handleResponse(res);
 
-  clearMRCaches();
+  clearMCRCaches();
 
   return data;
 }
 
 /* ========================
-   APPROVE MR
+   APPROVE MCR
 ======================== */
 
-export async function approveMR(id, payload) {
-  const res = await fetch(`${API_BASE}/api/mrs/${id}/approve`, {
+export async function approveMCR(id, payload = {}) {
+  const res = await fetch(`${API_BASE}/api/mcrs/${id}/approve`, {
     method: "POST",
-    headers: authHeaders(),
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(payload),
   });
 
-  const data = await handleResponse(
-    res,
-    "Failed to approve MR"
-  );
+  const data = await handleResponse(res);
 
-  clearMRCaches();
+  clearMCRCaches();
 
   return data;
 }
 
 /* ========================
-   REJECT MR
+   REJECT MCR
 ======================== */
 
-export async function rejectMR(id, payload) {
-  const res = await fetch(`${API_BASE}/api/mrs/${id}/reject`, {
+export async function rejectMCR(id, reason) {
+  const res = await fetch(`${API_BASE}/api/mcrs/${id}/reject`, {
     method: "POST",
     headers: authHeaders(),
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ reason }),
   });
 
-  const data = await handleResponse(
-    res,
-    "Failed to reject MR"
-  );
+  const data = await handleResponse(res);
 
-  clearMRCaches();
+  clearMCRCaches();
 
   return data;
 }

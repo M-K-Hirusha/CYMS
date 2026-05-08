@@ -212,14 +212,34 @@ exports.approveMCR = async (req, res, next) => {
       });
     }
 
-    // MAT counter in transaction
-    const materialCode = await getNextNumber("MAT", session);
+    const approvedName = req.body.name
+      ? String(req.body.name).trim()
+      : mcr.name;
+    const approvedCode = req.body.code
+      ? String(req.body.code).trim().toUpperCase()
+      : "";
+
+    if (!approvedCode) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: "Material code is required." });
+    }
+
+    const existingCode = await Material.findOne({
+      code: approvedCode,
+    }).session(session);
+
+    if (existingCode) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: "Material code already exists." });
+    }
 
     const [material] = await Material.create(
       [
         {
-          name: mcr.name,
-          code: materialCode,
+          name: approvedName,
+          code: approvedCode,
           unit: normalizedUnit,
           category: null,
           isActive: true,

@@ -7,6 +7,7 @@ const {
   getUsers,
   updateUserRole,
   assignUserToYard,
+  toggleUserStatus,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -40,6 +41,13 @@ router.patch(
   protect,
   authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN"),
   assignUserToYard
+);
+
+router.patch(
+  "/:id/status",
+  protect,
+  authorizeRoles("SYSTEM_ADMIN"),
+  toggleUserStatus
 );
 
 module.exports = router;

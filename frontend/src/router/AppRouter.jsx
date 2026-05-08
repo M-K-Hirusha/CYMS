@@ -8,6 +8,10 @@ import Reports from "../pages/Reports";
 import MRs from "../pages/MRs";
 import Tools from "../pages/Tools";
 import Materials from "../pages/Materials";
+import Inventory from "../pages/Inventory";
+import Yards from "../pages/Yards";
+import Users from "../pages/Users";
+import NotFound from "../pages/NotFound";
 
 export default function AppRouter() {
   return (
@@ -64,9 +68,38 @@ export default function AppRouter() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/inventory"
+            element={
+              <ProtectedRoute>
+                <Inventory />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/yards"
+            element={
+              <ProtectedRoute
+               allowedRoles={["SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN"]}>
+                <Yards />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute
+               allowedRoles={["SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN"]}>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
-        <Route path="*" element={<div>404 - Not Found</div>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

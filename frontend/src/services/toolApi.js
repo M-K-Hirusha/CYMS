@@ -1,3 +1,5 @@
+import { getCache, setCache, clearCache } from "../utils/apiCache";
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 function authHeaders() {
@@ -8,7 +10,40 @@ function authHeaders() {
   };
 }
 
+async function handleResponse(res, fallbackMessage) {
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    console.error(fallbackMessage, data);
+    throw new Error(data?.message || data?.error || fallbackMessage);
+  }
+
+  return data;
+}
+
+function clearToolCaches() {
+  clearCache("tools:");
+  clearCache("reports:tools-summary");
+  clearCache("reports:tools-movements");
+}
+
+function buildToolCacheKey(params = {}) {
+  return `tools:${JSON.stringify({
+    status: params.status || "",
+    currentLocationCode: params.currentLocationCode || "",
+    currentYard: params.currentYard || "",
+    search: params.search || "",
+    page: params.page || "",
+    limit: params.limit || "",
+  })}`;
+}
+
 export async function getTools(params = {}) {
+  const cacheKey = buildToolCacheKey(params);
+  const cached = getCache(cacheKey);
+
+  if (cached) return cached;
+
   const query = new URLSearchParams();
 
   if (params.status) query.append("status", params.status);
@@ -26,12 +61,9 @@ export async function getTools(params = {}) {
     headers: authHeaders(),
   });
 
-  const data = await res.json().catch(() => null);
+  const data = await handleResponse(res, "Failed to load tools");
 
-  if (!res.ok) {
-    console.error("Get tools error:", data);
-    throw new Error(data?.message || data?.error || "Failed to load tools");
-  }
+  setCache(cacheKey, data, 60 * 1000);
 
   return data;
 }
@@ -43,12 +75,8 @@ export async function createTool(payload) {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    console.error("Create tool error:", data);
-    throw new Error(data?.message || data?.error || "Failed to create tool");
-  }
+  const data = await handleResponse(res, "Failed to create tool");
+  clearToolCaches();
 
   return data;
 }
@@ -60,12 +88,8 @@ export async function issueTool(id, payload) {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    console.error("Issue tool error:", data);
-    throw new Error(data?.message || data?.error || "Failed to issue tool");
-  }
+  const data = await handleResponse(res, "Failed to issue tool");
+  clearToolCaches();
 
   return data;
 }
@@ -77,12 +101,8 @@ export async function returnTool(id, payload) {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    console.error("Return tool error:", data);
-    throw new Error(data?.message || data?.error || "Failed to return tool");
-  }
+  const data = await handleResponse(res, "Failed to return tool");
+  clearToolCaches();
 
   return data;
 }
@@ -94,17 +114,21 @@ export async function transferTool(id, payload) {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    console.error("Transfer tool error:", data);
-    throw new Error(data?.message || data?.error || "Failed to transfer tool");
-  }
+  const data = await handleResponse(res, "Failed to transfer tool");
+  clearToolCaches();
 
   return data;
 }
 
 export async function getToolMovements(id, params = {}) {
+  const cacheKey = `tools:${id}:movements:${JSON.stringify({
+    page: params.page || "",
+    limit: params.limit || "",
+  })}`;
+
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   const query = new URLSearchParams();
 
   if (params.page) query.append("page", params.page);
@@ -118,14 +142,9 @@ export async function getToolMovements(id, params = {}) {
     headers: authHeaders(),
   });
 
-  const data = await res.json().catch(() => null);
+  const data = await handleResponse(res, "Failed to load tool movements");
 
-  if (!res.ok) {
-    console.error("Get tool movements error:", data);
-    throw new Error(
-      data?.message || data?.error || "Failed to load tool movements"
-    );
-  }
+  setCache(cacheKey, data, 30 * 1000);
 
   return data;
 }
@@ -137,11 +156,8 @@ export async function updateToolStatus(toolId, payload) {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    throw new Error(data?.message || "Failed to update tool status");
-  }
+  const data = await handleResponse(res, "Failed to update tool status");
+  clearToolCaches();
 
   return data;
 }

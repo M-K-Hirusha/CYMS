@@ -253,7 +253,16 @@ exports.toolMovements = async (user, query) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .populate("tool", "name code")
+    .populate({
+      path: "tool",
+      select: "name code status currentYard currentLocationCode currentHolder",
+      populate: {
+        path: "currentYard",
+        select: "name code",
+      },
+    })
+    .populate("fromYard", "name code type")
+    .populate("toYard", "name code type")
     .populate("performedBy", "fullName role")
     .lean();
 

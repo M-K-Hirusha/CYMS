@@ -191,6 +191,9 @@ async function approveMR({ user, mrId, approvalLines, note, dispatchMainYardId }
         );
       }
     }
+    
+    let hasAtLeastOneDispatch = false;
+
     // Validate each approval line and perform stock movements
     for (const item of mr.items) {
       const matId = String(item.material);
@@ -216,20 +219,18 @@ async function approveMR({ user, mrId, approvalLines, note, dispatchMainYardId }
       }
       // Validate approvedQty
       const approvedQty = Number(line.approvedQty);
-      if (!Number.isFinite(approvedQty) || approvedQty <= 0) {
-        throw new AppError(400, "approvedQty must be > 0", "INVALID_APPROVED_QTY", {
-          material: matId,
-        });
+
+      if (!Number.isFinite(approvedQty) || approvedQty < 0) {
+        throw new AppError(400, "approvedQty cannot be negative", "INVALID_APPROVED_QTY");
       }
 
-      if (approvedQty > item.requestedQty) {
-        throw new AppError(
-          400,
-          "approvedQty cannot exceed requestedQty",
-          "APPROVED_EXCEEDS_REQUESTED",
-          { material: matId, requestedQty: item.requestedQty }
-        );
+      if (approvedQty === 0) {
+        item.approvedQty = 0;
+        continue;
       }
+
+      hasAtLeastOneDispatch = true;
+      
       // Perform stock movements
       await decreaseStock({
         yard: mainYard._id,
@@ -268,6 +269,16 @@ async function approveMR({ user, mrId, approvalLines, note, dispatchMainYardId }
 
       item.approvedQty = approvedQty;// Update approvedQty in MR item
     }
+    
+    // Ensure at least one item has approvedQty > 0 to prevent approving an MR with no actual dispatch
+    if (!hasAtLeastOneDispatch) {
+      throw new AppError(
+        400,
+        "At least one item must have approvedQty greater than 0",
+        "NO_APPROVAL_QTY"
+      );
+    }
+
     // Update MR status and approval info
     mr.status = "APPROVED";
     mr.approvedBy = user.id;

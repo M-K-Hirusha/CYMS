@@ -17,7 +17,7 @@ router.post(
 router.get(
   "/",
   protect,
-  authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN"),
+  authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN", "SITE_STAFF"),
   mrController.listMRs
 );
 
@@ -25,7 +25,7 @@ router.get(
 router.get(
   "/:id",
   protect,
-  authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN"),
+  authorizeRoles("SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN", "SITE_STAFF"),
   mrController.getMRById
 );
 
