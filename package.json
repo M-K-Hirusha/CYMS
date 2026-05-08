@@ -1,6 +1,10 @@
 {
   "dependencies": {
     "express-rate-limit": "^8.2.1",
-    "helmet": "^8.1.0"
+    "helmet": "^8.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
+    "xlsx": "^0.18.5"
   }
 }
