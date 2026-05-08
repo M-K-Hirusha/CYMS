@@ -69,6 +69,29 @@ The project follows a clean backend-first architecture using modular service-bas
 
 ---
 
+## Additional Libraries & Packages
+
+### Frontend Libraries
+
+* Recharts → Dashboard charts and analytics
+* jsPDF → PDF report generation
+* jspdf-autotable → Dynamic PDF tables
+* XLSX → Excel report export
+* Lucide React → Icon system
+* React Select → Advanced dropdown selection
+* Axios → API communication
+
+### Backend Libraries
+
+* jsonwebtoken → JWT authentication
+* bcryptjs → Password hashing
+* mongoose → MongoDB object modeling
+* dotenv → Environment variable management
+* cors → Cross-origin API handling
+* express-async-handler → Async error handling
+
+---
+
 # 🔐 Role-Based Access Control (RBAC)
 
 The system currently supports four user roles:
