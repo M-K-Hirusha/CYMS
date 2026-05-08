@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { theme } from "../styles/theme";
+import logo from "../assets/cyms-logo.png";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export default function Login() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
-      // 1) Login request
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,10 +31,8 @@ export default function Login() {
         throw new Error(data.message || "Login failed");
       }
 
-      // Save token
       localStorage.setItem("token", data.token);
 
-      // 2) Get current user (role) using token
       const meRes = await fetch(`${API_BASE}/api/auth/me`, {
         headers: {
           Authorization: `Bearer ${data.token}`,
@@ -45,202 +47,91 @@ export default function Login() {
 
       const user = meData.user ?? meData;
 
-      // Save role
       localStorage.setItem("role", user.role);
+      localStorage.setItem("user", JSON.stringify(user));
 
-      // 3) Redirect (CYMS roles)
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const styles = {
-    page: {
-      minHeight: "100vh",
-      width: "100%",
-      display: "grid",
-      placeItems: "center",
-      padding: 24,
-      backgroundColor: "#F6F7FB", // ✅ solid background (no transparency issues)
-      color: "#1444b1",
-      fontFamily:
-        'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"',
-    },
-
-    card: {
-      width: "100%",
-      maxWidth: 420,
-      backgroundColor: "#FFFFFF", // ✅ solid card background
-      border: "1px solid rgba(15, 23, 42, 0.10)",
-      borderRadius: 16,
-      padding: 24,
-      boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
-    },
-
-    title: {
-      margin: 0,
-      fontSize: 22,
-      fontWeight: 800,
-      letterSpacing: "-0.02em",
-      color: "#0F172A",
-    },
-
-    subtitle: {
-      margin: "6px 0 0 0",
-      fontSize: 13.5,
-      lineHeight: 1.4,
-      color: "rgba(15, 23, 42, 0.65)",
-    },
-
-    form: {
-      marginTop: 18,
-      display: "flex",
-      flexDirection: "column",
-      gap: 12,
-    },
-
-    label: {
-      fontSize: 13,
-      fontWeight: 700,
-      color: "rgba(15, 23, 42, 0.80)",
-      marginBottom: 6,
-      display: "block",
-    },
-
-    input: {
-      width: "100%",
-      padding: "12px 12px",
-      borderRadius: 12,
-      border: "1px solid rgba(15, 23, 42, 0.14)",
-      backgroundColor: "#FFFFFF",
-      color: "#0F172A",
-      fontSize: 14.5,
-      outline: "none",
-      transition: "box-shadow 150ms ease, border-color 150ms ease",
-    },
-
-    button: {
-      marginTop: 6,
-      padding: "12px 14px",
-      borderRadius: 12,
-      border: "1px solid rgba(15, 23, 42, 0.12)",
-      backgroundColor: "#0F172A", // ✅ strong CTA
-      color: "#FFFFFF",
-      fontSize: 14.5,
-      fontWeight: 800,
-      cursor: "pointer",
-      transition: "transform 120ms ease, opacity 120ms ease",
-    },
-
-    errorBox: {
-      marginTop: 8,
-      borderRadius: 12,
-      border: "1px solid rgba(220, 38, 38, 0.25)",
-      backgroundColor: "rgba(220, 38, 38, 0.08)",
-      padding: "10px 12px",
-      color: "rgba(185, 28, 28, 1)",
-      fontSize: 13.5,
-      lineHeight: 1.35,
-    },
-
-    footer: {
-      marginTop: 16,
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      fontSize: 13,
-      color: "rgba(15, 23, 42, 0.65)",
-    },
-
-    link: {
-      color: "#0F172A",
-      textDecoration: "none",
-      fontWeight: 800,
-    },
-
-    divider: {
-      marginTop: 16,
-      height: 1,
-      width: "100%",
-      backgroundColor: "rgba(15, 23, 42, 0.08)",
-    },
-  };
-
-  const focusOn = (e) => {
-    e.target.style.borderColor = "rgba(15, 23, 42, 0.35)";
-    e.target.style.boxShadow = "0 0 0 4px rgba(15, 23, 42, 0.08)";
-  };
-
-  const focusOff = (e) => {
-    e.target.style.borderColor = "rgba(15, 23, 42, 0.14)";
-    e.target.style.boxShadow = "none";
-  };
+  }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Welcome back</h1>
-        <p style={styles.subtitle}>Sign in to continue to CYMS.</p>
+    <div style={pageStyle}>
+      <div style={glowOneStyle} />
+      <div style={glowTwoStyle} />
 
-        <form onSubmit={handleSubmit} style={styles.form}>
+      <div style={cardStyle}>
+        <div style={brandRowStyle}>
+          <img src={logo} alt="CYMS Logo" style={brandLogoImageStyle} />
+        </div>
+
+        <div style={dividerStyle} />
+
+        <div style={heroTextWrapStyle}>
+          <h2 style={titleStyle}>Welcome back</h2>
+          <p style={subtitleStyle}>
+            Sign in to continue to your Construction Yard Management System.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={formStyle}>
           <div>
-            <label style={styles.label} htmlFor="email">
+            <label style={labelStyle} htmlFor="email">
               Email
             </label>
             <input
               id="email"
-              style={styles.input}
+              style={inputStyle}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               required
               autoComplete="email"
-              placeholder="name@company.com"
-              onFocus={focusOn}
-              onBlur={focusOff}
+              placeholder="system@cyms.com"
             />
           </div>
 
           <div>
-            <label style={styles.label} htmlFor="password">
+            <label style={labelStyle} htmlFor="password">
               Password
             </label>
             <input
               id="password"
-              style={styles.input}
+              style={inputStyle}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               required
               autoComplete="current-password"
               placeholder="••••••••"
-              onFocus={focusOn}
-              onBlur={focusOff}
             />
           </div>
 
-          <button
-            style={styles.button}
-            type="submit"
-            onMouseDown={(e) => (e.currentTarget.style.transform = "translateY(1px)")}
-            onMouseUp={(e) => (e.currentTarget.style.transform = "translateY(0px)")}
-          >
-            Sign in
-          </button>
-
           {error && (
-            <div style={styles.errorBox} role="alert" aria-live="polite">
+            <div style={errorBoxStyle} role="alert" aria-live="polite">
               {error}
             </div>
           )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              ...primaryButtonStyle,
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
+          >
+            {loading ? "Signing in..." : "Sign in"}
+          </button>
         </form>
 
-        <div style={styles.divider} />
-
-        <div style={styles.footer}>
+        <div style={footerStyle}>
           <span>Need help?</span>
-          <Link style={styles.link} to="/unauthorized">
+          <Link style={linkStyle} to="/unauthorized">
             Contact support
           </Link>
         </div>
@@ -248,3 +139,179 @@ export default function Login() {
     </div>
   );
 }
+
+const pageStyle = {
+  minHeight: "100dvh",
+  width: "100%",
+  maxWidth: "100%",
+  minWidth: 0,
+  display: "grid",
+  placeItems: "center",
+  padding: "clamp(16px, 4vw, 24px)",
+  background:
+    "radial-gradient(circle at top left, rgba(37,99,235,0.08), transparent 32%), radial-gradient(circle at bottom right, rgba(22,163,74,0.07), transparent 30%), #f8fafc",
+  color: theme.text,
+  position: "relative",
+  overflowX: "hidden",
+  boxSizing: "border-box",
+};
+
+const glowOneStyle = {
+  position: "absolute",
+  width: 420,
+  height: 420,
+  borderRadius: "50%",
+  background: "rgba(37,99,235,0.08)",
+  filter: "blur(100px)",
+  top: -120,
+  left: -120,
+  pointerEvents: "none",
+};
+
+const glowTwoStyle = {
+  position: "absolute",
+  width: 360,
+  height: 360,
+  borderRadius: "50%",
+  background: "rgba(22,163,74,0.07)",
+  filter: "blur(100px)",
+  right: -110,
+  bottom: -110,
+  pointerEvents: "none",
+};
+
+const cardStyle = {
+  width: "100%",
+  maxWidth: 460,
+  minWidth: 0,
+  background: "rgba(255,255,255,0.82)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+  border: "1px solid rgba(226,232,240,0.85)",
+  borderRadius: "clamp(20px, 5vw, 28px)",
+  padding: "clamp(22px, 5vw, 34px) clamp(18px, 5vw, 32px)",
+  boxShadow:
+    "0 24px 70px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.75)",
+  position: "relative",
+  zIndex: 2,
+  boxSizing: "border-box",
+};
+
+const brandRowStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+};
+
+const brandLogoImageStyle = {
+  width: "100%",
+  maxWidth: 165,
+  height: "auto",
+  objectFit: "contain",
+  display: "block",
+};
+
+const dividerStyle = {
+  height: 1,
+  background: theme.border,
+  margin: "18px 0 24px",
+};
+
+const heroTextWrapStyle = {
+  maxWidth: 340,
+  margin: "0 auto 4px",
+  textAlign: "center",
+};
+
+const titleStyle = {
+  margin: 0,
+  fontSize: "clamp(22px, 5vw, 24px)",
+  fontWeight: 900,
+  letterSpacing: "-0.04em",
+  color: theme.text,
+  lineHeight: 1.15,
+};
+
+const subtitleStyle = {
+  margin: "10px 0 0",
+  fontSize: 15,
+  lineHeight: 1.6,
+  color: theme.muted,
+};
+
+const formStyle = {
+  marginTop: 22,
+  display: "grid",
+  gap: 14,
+  width: "100%",
+  minWidth: 0,
+};
+
+const labelStyle = {
+  fontSize: 13,
+  fontWeight: 800,
+  color: theme.textSoft,
+  marginBottom: 8,
+  display: "block",
+};
+
+const inputStyle = {
+  width: "100%",
+  maxWidth: "100%",
+  minWidth: 0,
+  padding: "14px 15px",
+  borderRadius: 14,
+  border: `1px solid ${theme.border}`,
+  background: "#f8fafc",
+  color: theme.text,
+  fontSize: 14,
+  outline: "none",
+  transition: "all 0.2s ease",
+  boxSizing: "border-box",
+};
+
+const primaryButtonStyle = {
+  marginTop: 6,
+  width: "100%",
+  padding: "14px 16px",
+  borderRadius: 14,
+  border: "none",
+  background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+  color: "#ffffff",
+  fontSize: 14,
+  fontWeight: 900,
+  cursor: "pointer",
+  boxShadow: "0 12px 24px rgba(37,99,235,0.18)",
+  transition: "all 0.2s ease",
+};
+
+const errorBoxStyle = {
+  borderRadius: 12,
+  border: "1px solid rgba(239,68,68,0.25)",
+  background: theme.dangerSoft,
+  padding: "10px 12px",
+  color: theme.danger,
+  fontSize: 13,
+  fontWeight: 700,
+  lineHeight: 1.4,
+};
+
+const footerStyle = {
+  marginTop: 22,
+  paddingTop: 18,
+  borderTop: `1px solid ${theme.border}`,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 10,
+  flexWrap: "wrap",
+  fontSize: 13,
+  color: theme.muted,
+};
+
+const linkStyle = {
+  color: theme.primary,
+  textDecoration: "none",
+  fontWeight: 800,
+};

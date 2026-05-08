@@ -1,26 +1,24 @@
 import { Link } from "react-router-dom";
-import { ShieldX, ArrowLeft, LayoutDashboard } from "lucide-react";
+import { SearchX, ArrowLeft, Home } from "lucide-react";
 import { theme } from "../styles/theme";
 
-export default function Unauthorized() {
+export default function NotFound() {
   return (
     <div style={pageStyle}>
-      <div style={backgroundGlowOne} />
-      <div style={backgroundGlowTwo} />
+      <div style={glowStyle} />
 
       <div style={cardStyle}>
-        <div style={iconWrapperStyle}>
-          <ShieldX size={42} />
+        <div style={iconWrapStyle}>
+          <SearchX size={46} />
         </div>
 
-        <p style={eyebrowStyle}>ACCESS RESTRICTED</p>
+        <p style={eyebrowStyle}>404 ERROR</p>
 
-        <h1 style={titleStyle}>Unauthorized Access</h1>
+        <h1 style={titleStyle}>Page Not Found</h1>
 
         <p style={descriptionStyle}>
-          You don&apos;t have permission to access this page or perform this
-          action. Please contact your administrator if you believe this is a
-          mistake.
+          The page you are looking for does not exist, was moved,
+          or the URL is incorrect.
         </p>
 
         <div style={buttonRowStyle}>
@@ -34,8 +32,8 @@ export default function Unauthorized() {
               e.currentTarget.style.transform = "translateY(0)";
             }}
           >
-            <LayoutDashboard size={16} />
-            Go to Dashboard
+            <Home size={16} />
+            Dashboard
           </Link>
 
           <button
@@ -64,41 +62,28 @@ export default function Unauthorized() {
 
 const pageStyle = {
   minHeight: "100vh",
+  background: theme.bg,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   padding: 24,
-  background: theme.bg,
-  position: "relative",
   overflow: "hidden",
+  position: "relative",
 };
 
-const backgroundGlowOne = {
+const glowStyle = {
   position: "absolute",
-  width: 320,
-  height: 320,
+  width: 420,
+  height: 420,
   borderRadius: "50%",
   background: "rgba(37,99,235,0.08)",
-  filter: "blur(90px)",
-  top: -80,
-  left: -80,
-};
-
-const backgroundGlowTwo = {
-  position: "absolute",
-  width: 280,
-  height: 280,
-  borderRadius: "50%",
-  background: "rgba(239,68,68,0.08)",
-  filter: "blur(90px)",
-  bottom: -60,
-  right: -60,
+  filter: "blur(100px)",
 };
 
 const cardStyle = {
   width: "100%",
-  maxWidth: 560,
-  padding: "48px 40px",
+  maxWidth: 580,
+  padding: "52px 40px",
   borderRadius: 28,
   border: `1px solid ${theme.border}`,
   background: theme.surface,
@@ -108,17 +93,17 @@ const cardStyle = {
   textAlign: "center",
 };
 
-const iconWrapperStyle = {
-  width: 88,
-  height: 88,
-  margin: "0 auto 22px",
+const iconWrapStyle = {
+  width: 90,
+  height: 90,
+  margin: "0 auto 24px",
   borderRadius: 24,
+  background: theme.primarySoft,
+  border: `1px solid ${theme.primaryBorder}`,
+  color: theme.primary,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: theme.dangerSoft,
-  border: "1px solid rgba(239,68,68,0.18)",
-  color: theme.danger,
 };
 
 const eyebrowStyle = {
@@ -127,13 +112,12 @@ const eyebrowStyle = {
   fontSize: 12,
   fontWeight: 800,
   letterSpacing: "0.14em",
-  textTransform: "uppercase",
 };
 
 const titleStyle = {
   margin: "12px 0 14px",
   color: theme.text,
-  fontSize: 40,
+  fontSize: 42,
   fontWeight: 900,
   letterSpacing: "-0.04em",
 };
@@ -146,9 +130,8 @@ const descriptionStyle = {
 };
 
 const buttonRowStyle = {
-  marginTop: 32,
+  marginTop: 34,
   display: "flex",
-  alignItems: "center",
   justifyContent: "center",
   gap: 14,
   flexWrap: "wrap",
@@ -157,16 +140,14 @@ const buttonRowStyle = {
 const primaryButtonStyle = {
   display: "inline-flex",
   alignItems: "center",
-  justifyContent: "center",
   gap: 8,
   padding: "13px 18px",
   borderRadius: 12,
   border: "none",
   background: theme.primary,
   color: "#ffffff",
-  fontSize: 14,
-  fontWeight: 800,
   textDecoration: "none",
+  fontWeight: 800,
   boxShadow: "0 12px 24px rgba(37,99,235,0.18)",
   transition: "all 0.2s ease",
 };
@@ -174,14 +155,12 @@ const primaryButtonStyle = {
 const secondaryButtonStyle = {
   display: "inline-flex",
   alignItems: "center",
-  justifyContent: "center",
   gap: 8,
   padding: "13px 18px",
   borderRadius: 12,
   border: `1px solid ${theme.border}`,
   background: theme.surfaceSoft,
   color: theme.text,
-  fontSize: 14,
   fontWeight: 700,
   cursor: "pointer",
   transition: "all 0.2s ease",
