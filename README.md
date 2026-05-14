@@ -531,6 +531,10 @@ NSBM Green University
 
 ---
 
-# 📄 License
+## 📄 License
 
-This project was developed for academic and educational purposes as part of a Final Year Software Engineering project.
+This project was developed as part of a Final Year Software Engineering project in collaboration with a real-world construction company.
+
+CYMS (Construction Yard Management System) was designed and implemented to support practical construction yard operations, including inventory management, material requests, tool tracking, and reporting workflows.
+
+This repository is intended for portfolio, academic, and demonstration purposes unless otherwise authorized by the project owner.
