@@ -81,7 +81,11 @@ userSchema.pre("validate", async function () {
 
   if (role === "SITE_ADMIN" || role === "SITE_STAFF") {
     if (!this.assignedYard) {
-      throw new Error(`${role} must have assignedYard`);
+      if (managed.length > 0) {
+        throw new Error(`${role} cannot have managedMainYards`);
+      }
+
+      return;
     }
 
     const yard = await Yard.findById(this.assignedYard).select("type isActive");

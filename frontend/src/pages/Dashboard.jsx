@@ -4,9 +4,10 @@ import {
   AlertCircle,
   CheckCircle2,
   ClipboardList,
-  Database,
+  LayoutDashboard,
   Server,
   Wrench,
+  Database,
 } from "lucide-react";
 import { getHealth } from "../services/api";
 import {
@@ -89,7 +90,17 @@ export default function Dashboard() {
       <div style={getHeaderStyle(isMobile)}>
         <div style={{ minWidth: 0 }}>
           <p style={eyebrowStyle}>CYMS Overview</p>
-          <h1 style={getTitleStyle(isMobile)}>Dashboard</h1>
+
+          <div style={getTitleRowStyle(isMobile)}>
+            <LayoutDashboard
+              size={isMobile ? 22 : 26}
+              color={theme.textSoft}
+              strokeWidth={2.2}
+            />
+
+            <h1 style={getTitleStyle(isMobile)}>Dashboard</h1>
+          </div>
+
           <p style={subtitleStyle}>
             Track material requests, stock levels, tool availability, and key
             yard operations.
@@ -379,6 +390,28 @@ function getHeaderStyle(isMobile) {
   };
 }
 
+function getTitleRowStyle(isMobile) {
+  return {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 10,
+    width: "100%",
+    minWidth: 0,
+  };
+}
+
+function getTitleStyle(isMobile) {
+  return {
+    margin: 0,
+    color: theme.text,
+    fontSize: isMobile ? 28 : 34,
+    fontWeight: 900,
+    letterSpacing: "-0.04em",
+    lineHeight: 1.1,
+  };
+}
+
 const eyebrowStyle = {
   margin: "0 0 6px",
   color: theme.primary,
@@ -387,16 +420,6 @@ const eyebrowStyle = {
   letterSpacing: "0.08em",
   textTransform: "uppercase",
 };
-
-function getTitleStyle(isMobile) {
-  return {
-    margin: 0,
-    color: theme.text,
-    fontSize: isMobile ? 28 : 34,
-    letterSpacing: "-0.04em",
-    lineHeight: 1.1,
-  };
-}
 
 const subtitleStyle = {
   margin: "8px 0 0",

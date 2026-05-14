@@ -27,6 +27,7 @@ import {
 import { useToast } from "../context/ToastContext";
 import ConfirmModal from "../components/ConfirmModal";
 import { theme } from "../styles/theme";
+import { clearMultipleCache } from "../utils/apiCache";
 
 const UNITS = ["PCS", "KG", "G", "L", "ML", "M", "M2", "M3", "BAG", "BOX"];
 const pageSize = 5;
@@ -48,6 +49,16 @@ export default function Materials() {
     currentRole === "SYSTEM_ADMIN" ||
     currentRole === "HEAD_OFFICE_ADMIN" ||
     currentRole === "SITE_ADMIN";
+
+  function clearMaterialRelatedCache() {
+    clearMultipleCache([
+      "dashboard",
+      "materials",
+      "inventory",
+      "mrs",
+      "reports",
+    ]);
+  }
 
   const actionMenuRef = useRef(null);
 
@@ -269,6 +280,8 @@ export default function Materials() {
         category: form.category.trim() || null,
       });
 
+      clearMaterialRelatedCache();
+
       closeModal();
       setCurrentPage(1);
       await loadMaterials();
@@ -299,6 +312,8 @@ export default function Materials() {
       };
 
       await updateMaterial(editingMaterial._id, updatedPayload);
+
+      clearMaterialRelatedCache();
 
       setMaterials((prev) =>
         prev.map((material) =>
@@ -348,6 +363,8 @@ export default function Materials() {
         description: optimisticMCR.description,
       });
 
+      clearMaterialRelatedCache();
+
       setMCRs((prev) => prev.map((mcr) => (mcr._id === tempId ? created.data || created : mcr)));
       showToast("Material request submitted successfully", "success");
     } catch (err) {
@@ -379,6 +396,8 @@ export default function Materials() {
       const nextStatus = material.isActive === false;
 
       await updateMaterial(material._id, { isActive: nextStatus });
+
+      clearMaterialRelatedCache();
 
       setMaterials((prev) =>
         prev.map((item) =>
@@ -414,6 +433,7 @@ export default function Materials() {
     try {
       setProcessingAction(true);
       await deleteMaterial(material._id);
+      clearMaterialRelatedCache();
       setConfirmConfig(null);
       await loadMaterials();
       showToast("Material deleted successfully", "success");
@@ -450,6 +470,7 @@ export default function Materials() {
       setRejectMcr(null);
       setRejectReason("");
       await rejectMCR(rejectedId, rejectReason.trim());
+      clearMaterialRelatedCache();
       showToast("MCR rejected", "success");
     } catch (err) {
       setMCRs(previousMcrs);
@@ -477,6 +498,8 @@ export default function Materials() {
         name: approveForm.name.trim(),
         code: approveForm.code.trim().toUpperCase(),
       });
+
+      clearMaterialRelatedCache();
 
       await loadMaterials();
       showToast("Material approved and created", "success");
@@ -583,7 +606,7 @@ export default function Materials() {
               style={notificationButtonStyle}
               aria-label="Material requests"
             >
-              <Bell size={18} />
+              <Bell size={16} />
               {pendingMCRCount > 0 && <span style={notificationBadgeStyle}>{pendingMCRCount}</span>}
             </button>
           )}

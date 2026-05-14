@@ -22,6 +22,7 @@ import {
 import { useToast } from "../context/ToastContext";
 import ConfirmModal from "../components/ConfirmModal";
 import { theme } from "../styles/theme";
+import { clearMultipleCache } from "../utils/apiCache";
 
 export default function Inventory() {
   const { showToast } = useToast();
@@ -95,6 +96,14 @@ export default function Inventory() {
     role === "SITE_STAFF";
 
   const canTransfer = role === "SYSTEM_ADMIN" || role === "HEAD_OFFICE_ADMIN";
+
+  function clearInventoryRelatedCache() {
+    clearMultipleCache([
+      "dashboard",
+      "inventory",
+      "reports",
+    ]);
+  }
 
   const selectedYard = yards.find((yard) => yard._id === selectedYardId);
 
@@ -473,6 +482,8 @@ export default function Inventory() {
         note: receiveForm.note || undefined,
       });
 
+      clearInventoryRelatedCache();
+
       await loadStockForYard(selectedYardId);
 
       resetReceiveForm();
@@ -546,6 +557,8 @@ export default function Inventory() {
         qty,
         note: issueForm.note || undefined,
       });
+
+      clearInventoryRelatedCache();
 
       await loadStockForYard(selectedYardId);
 
@@ -691,6 +704,8 @@ export default function Inventory() {
         qty,
         note: transferForm.note || undefined,
       });
+
+      clearInventoryRelatedCache();
 
       await loadStockForYard(selectedYardId);
 

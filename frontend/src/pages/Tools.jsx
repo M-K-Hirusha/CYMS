@@ -26,6 +26,7 @@ import { getMainYards, getAllYards } from "../services/yardApi";
 import { useToast } from "../context/ToastContext";
 import ConfirmModal from "../components/ConfirmModal";
 import { theme } from "../styles/theme";
+import { clearMultipleCache } from "../utils/apiCache";
 
 export default function Tools() {
   const { showToast } = useToast();
@@ -109,6 +110,14 @@ export default function Tools() {
 
   const role = localStorage.getItem("role");
   const canCreateTool = role === "SYSTEM_ADMIN" || role === "HEAD_OFFICE_ADMIN";
+
+  function clearToolRelatedCache() {
+    clearMultipleCache([
+      "dashboard",
+      "tools",
+      "reports",
+    ]);
+  }
 
   const summary = useMemo(() => {
     return {
@@ -261,6 +270,8 @@ export default function Tools() {
         currentLocationCode: "MAIN_STORE",
       });
 
+      clearToolRelatedCache();
+
       setFormData({ name: "", code: "", description: "", currentYard: "" });
       setShowCreate(false);
       setCurrentPage(1);
@@ -299,6 +310,8 @@ export default function Tools() {
         issuedTo: issueForm.issuedTo.trim(),
         note: issueForm.note.trim() || undefined,
       });
+
+      clearToolRelatedCache();
 
       setShowIssue(false);
       setSelectedTool(null);
@@ -343,6 +356,8 @@ export default function Tools() {
         toLocationCode: returnForm.toLocationCode.trim().toUpperCase(),
         note: returnForm.note.trim() || undefined,
       });
+
+      clearToolRelatedCache();
 
       setShowReturn(false);
       setSelectedTool(null);
@@ -390,6 +405,8 @@ export default function Tools() {
         toLocationCode: transferForm.toLocationCode.trim().toUpperCase(),
         note: transferForm.note.trim() || undefined,
       });
+      
+      clearToolRelatedCache();
 
       setShowTransfer(false);
       setSelectedTool(null);
@@ -415,6 +432,8 @@ export default function Tools() {
       await updateToolStatus(statusConfirmTool._id, {
         status: statusConfirmValue,
       });
+
+      clearToolRelatedCache();
 
       setCurrentPage(1);
       await loadTools();
@@ -1081,6 +1100,7 @@ export default function Tools() {
                 onClick={closeMovementsModal}
                 style={getSecondaryButtonStyle(isMobile)}
                 disabled={movementsLoading}
+                className="close-btn"
               >
                 Close
               </button>

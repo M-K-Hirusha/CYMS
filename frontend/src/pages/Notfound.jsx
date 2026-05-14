@@ -61,14 +61,18 @@ export default function NotFound() {
 }
 
 const pageStyle = {
+  height: "100vh",
   minHeight: "100vh",
+  width: "100%",
   background: theme.bg,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   padding: 24,
   overflow: "hidden",
-  position: "relative",
+  position: "fixed",
+  inset: 0,
+  boxSizing: "border-box",
 };
 
 const glowStyle = {

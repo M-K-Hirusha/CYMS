@@ -26,10 +26,29 @@ export function setCache(key, data, ttl = DEFAULT_TTL) {
 }
 
 export function clearCache(key) {
-  if (key) {
-    cache.delete(key);
+  if (!key) {
+    cache.clear();
+    notifyCacheChanged();
     return;
   }
 
-  cache.clear();
+  for (const cacheKey of cache.keys()) {
+    if (
+      cacheKey === key ||
+      cacheKey.startsWith(`${key}-`) ||
+      cacheKey.includes(key)
+    ) {
+      cache.delete(cacheKey);
+    }
+  }
+
+  notifyCacheChanged();
+}
+
+export function clearMultipleCache(keys = []) {
+  keys.forEach((key) => clearCache(key));
+}
+
+export function notifyCacheChanged() {
+  window.dispatchEvent(new Event("cyms-cache-changed"));
 }

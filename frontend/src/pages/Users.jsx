@@ -21,6 +21,7 @@ import { getSiteYards, getMainYards } from "../services/yardApi";
 import { useToast } from "../context/ToastContext";
 import ConfirmModal from "../components/ConfirmModal";
 import { theme } from "../styles/theme";
+import { clearMultipleCache } from "../utils/apiCache";
 
 const ROLES = [
   "SYSTEM_ADMIN",
@@ -80,6 +81,10 @@ export default function Users() {
 
   const canManageStatus = currentRole === "SYSTEM_ADMIN";
 
+  function clearUserRelatedCache() {
+    clearMultipleCache(["dashboard", "users", "yards", "reports"]);
+  }
+
   const visibleRoles = useMemo(() => {
     if (currentRole === "HEAD_OFFICE_ADMIN") return ["SITE_STAFF"];
     return ROLES;
@@ -104,11 +109,42 @@ export default function Users() {
   }, [mainYards]);
 
   const siteYardOptions = useMemo(() => {
+    // ONLY restrict yards for SITE_ADMIN
+    if (assignModal?.role === "SITE_ADMIN") {
+      const assignedSiteAdminYardIds = users
+        .filter(
+          (user) =>
+            user.role === "SITE_ADMIN" &&
+            user._id !== assignModal?._id &&
+            user.assignedYard
+        )
+        .map((user) =>
+          typeof user.assignedYard === "object"
+            ? String(user.assignedYard._id)
+            : String(user.assignedYard)
+        );
+
+      return siteYards
+        .filter(
+          (yard) =>
+            !assignedSiteAdminYardIds.includes(String(yard._id))
+        )
+        .map((yard) => ({
+          value: yard._id,
+          label: `${yard.name}${
+            yard.projectCode ? ` - ${yard.projectCode}` : ""
+          }`,
+        }));
+    }
+
+    // SITE_STAFF can access ANY active SITE yard
     return siteYards.map((yard) => ({
       value: yard._id,
-      label: `${yard.name}${yard.projectCode ? ` - ${yard.projectCode}` : ""}`,
+      label: `${yard.name}${
+        yard.projectCode ? ` - ${yard.projectCode}` : ""
+      }`,
     }));
-  }, [siteYards]);
+  }, [siteYards, users, assignModal]);
 
   const selectedCreateMainYards = useMemo(() => {
     return mainYardOptions.filter((option) =>
@@ -310,6 +346,7 @@ export default function Users() {
       setCreating(true);
 
       await createUser(payload);
+      clearUserRelatedCache();
 
       closeCreateModal();
       setCurrentPage(1);
@@ -347,7 +384,7 @@ export default function Users() {
     if (!assignModal?._id) return;
 
     try {
-      if (assignModal.role === "SITE_ADMIN" || assignModal.role === "SITE_STAFF") {
+      if (assignModal.role === "SITE_STAFF") {
         if (!assignForm.assignedYard) {
           showToast("Please assign a SITE yard", "error");
           return;
@@ -368,9 +405,12 @@ export default function Users() {
           managedMainYardIds: assignForm.managedMainYardIds,
         });
       } else {
-        await assignUserToYard(assignModal._id, assignForm.assignedYard);
+        await assignUserToYard(assignModal._id, {
+          yardId: assignForm.assignedYard || null,
+        });
       }
 
+      clearUserRelatedCache();
       closeAssignModal();
       await loadData();
 
@@ -401,6 +441,7 @@ export default function Users() {
       setProcessingAction(true);
 
       await updateUserStatus(user._id, user.isActive === false);
+      clearUserRelatedCache();
 
       setConfirmConfig(null);
       await loadData();
@@ -956,7 +997,7 @@ export default function Users() {
                   options={siteYardOptions}
                   value={siteYardOptions.find(
                     (option) => option.value === form.assignedYard
-                  )}
+                  ) || null}
                   onChange={(selected) =>
                     setForm({ ...form, assignedYard: selected?.value || "" })
                   }
@@ -1056,6 +1097,7 @@ export default function Users() {
               <Field label="Assigned SITE Yard">
                 <Select
                   isSearchable
+                  isClearable
                   menuPortalTarget={document.body}
                   menuPosition="fixed"
                   menuShouldScrollIntoView={false}
@@ -1063,7 +1105,7 @@ export default function Users() {
                   options={siteYardOptions}
                   value={siteYardOptions.find(
                     (option) => option.value === assignForm.assignedYard
-                  )}
+                  ) || null}
                   onChange={(selected) =>
                     setAssignForm({
                       ...assignForm,

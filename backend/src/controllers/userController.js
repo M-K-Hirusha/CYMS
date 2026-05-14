@@ -169,18 +169,34 @@ exports.assignUserToYard = async (req, res, next) => {
 
     // HEAD_OFFICE_ADMIN restriction
     if (req.user.role === "HEAD_OFFICE_ADMIN") {
-      if (!["SITE_ADMIN", "SITE_STAFF"].includes(user.role)) {
+      if (user.role !== "SITE_STAFF") {
         return res.status(403).json({
-          message:
-            "HEAD_OFFICE_ADMIN can only assign yards to SITE_ADMIN or SITE_STAFF.",
+          message: "HEAD_OFFICE_ADMIN can only assign yards to SITE_STAFF users.",
         });
       }
     }
 
     // SITE USERS
     if (user.role === "SITE_ADMIN" || user.role === "SITE_STAFF") {
+      // Remove SITE user yard assignment
       if (!yardId) {
-        return res.status(400).json({ message: "yardId is required" });
+        if (
+          req.user.role !== "SYSTEM_ADMIN" &&
+          !(req.user.role === "HEAD_OFFICE_ADMIN" && user.role === "SITE_STAFF")
+        ) {
+          return res.status(403).json({
+            message: "You do not have permission to remove this yard assignment",
+          });
+        }
+
+        user.assignedYard = null;
+        user.managedMainYards = [];
+        await user.save();
+
+        return res.json({
+          message: "SITE user yard assignment removed successfully",
+          user,
+        });
       }
 
       const yard = await Yard.findById(yardId);
@@ -258,7 +274,7 @@ exports.assignUserToYard = async (req, res, next) => {
         });
       }
 
-      user.assignedYard = null; // Just to be safe, HEAD_OFFICE_ADMIN should not have assignedYard
+      user.assignedYard = null;
       user.managedMainYards = managedMainYardIds;
 
       await user.save();

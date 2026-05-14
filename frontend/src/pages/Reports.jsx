@@ -34,7 +34,11 @@ import {
 } from "recharts";
 import { useToast } from "../context/ToastContext";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import {
+  addPdfHeader,
+  addPdfFooter,
+  addPdfTable,
+} from "../utils/pdfUtils";
 import * as XLSX from "xlsx";
 import { theme } from "../styles/theme";
 
@@ -311,16 +315,6 @@ export default function Reports() {
     setProgress(0);
   }
 
-  function addPdfHeader(doc, title) {
-    doc.setFontSize(18);
-    doc.text(`CYMS - ${title}`, 14, 18);
-    doc.setFontSize(10);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 26);
-    doc.text("Construction Yard Management System", 14, 32);
-    doc.setDrawColor(37, 99, 235);
-    doc.line(14, 36, 196, 36);
-  }
-
   function isWithinDateRange(createdAt) {
     if (!modalDateFrom && !modalDateTo) return true;
     if (!createdAt) return false;
@@ -336,10 +330,11 @@ export default function Reports() {
 
   function downloadMRPDF() {
     const doc = new jsPDF("l", "mm", "a4");
+
     addPdfHeader(doc, "Material Request Report");
 
-    autoTable(doc, {
-      startY: 44,
+    addPdfTable(doc, {
+      startY: 48,
       head: [["Status", "Count"]],
       body: [
         ["Total MRs", mrCounts.total],
@@ -347,38 +342,53 @@ export default function Reports() {
         ["Approved", mrCounts.approved],
         ["Rejected", mrCounts.rejected],
       ],
-      theme: "grid",
-      headStyles: { fillColor: [37, 99, 235] },
     });
 
     const filteredMRRows = (Array.isArray(mrRows) ? mrRows : []).filter((mr) => {
       const mrYardId =
-        mr.yard?._id || mr.requestingYard?._id || mr.siteYard?._id || mr.yard || mr.requestingYard || mr.siteYard;
+        mr.yard?._id ||
+        mr.requestingYard?._id ||
+        mr.siteYard?._id ||
+        mr.yard ||
+        mr.requestingYard ||
+        mr.siteYard;
 
       if (modalYardId && String(mrYardId) !== String(modalYardId)) return false;
       return isWithinDateRange(mr.createdAt);
     });
 
     const rows = filteredMRRows.map((mr) => [
-      mr.mrNo || mr.mrNumber || mr.requestNumber || `MR-${String(mr._id).slice(-6)}`,
+      mr.mrNo ||
+        mr.mrNumber ||
+        mr.requestNumber ||
+        `MR-${String(mr._id).slice(-6)}`,
       mr.status || "N/A",
-      mr.requestedBy?.fullName || mr.requestedBy?.name || mr.createdBy?.fullName || mr.createdBy?.name || "N/A",
-      mr.yard?.name || mr.requestingYard?.name || mr.siteYard?.name || mr.yardName || "N/A",
+      mr.requestedBy?.fullName ||
+        mr.requestedBy?.name ||
+        mr.createdBy?.fullName ||
+        mr.createdBy?.name ||
+        "N/A",
+      mr.yard?.name ||
+        mr.requestingYard?.name ||
+        mr.siteYard?.name ||
+        mr.yardName ||
+        "N/A",
       Array.isArray(mr.items) ? mr.items.length : 0,
       mr.createdAt ? new Date(mr.createdAt).toLocaleString() : "N/A",
     ]);
 
-    doc.setFontSize(14);
-    doc.text("MR Detailed List", 14, doc.lastAutoTable.finalY + 12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(15, 23, 42);
+    doc.text("MR Detailed List", 14, doc.lastAutoTable.finalY + 10);
 
-    autoTable(doc, {
-      startY: doc.lastAutoTable.finalY + 18,
+    addPdfTable(doc, {
+      startY: doc.lastAutoTable.finalY + 14,
       head: [["MR Number", "Status", "Requested By", "Yard", "Items", "Created Date"]],
       body: rows.length > 0 ? rows : [["No MRs found", "-", "-", "-", "-", "-"]],
-      theme: "grid",
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [37, 99, 235] },
     });
+
+    addPdfFooter(doc);
 
     doc.save("CYMS_Material_Request_Report.pdf");
     showToast("MR report downloaded successfully", "success");
@@ -386,6 +396,7 @@ export default function Reports() {
 
   function downloadStockPDF() {
     const doc = new jsPDF("l", "mm", "a4");
+
     addPdfHeader(doc, "Stock Summary Report");
 
     const filteredStockPDFRows = stockRows.filter((row) => {
@@ -402,13 +413,13 @@ export default function Reports() {
       row.qtyOnHand ?? row.qty ?? 0,
     ]);
 
-    autoTable(doc, {
-      startY: 44,
+    addPdfTable(doc, {
+      startY: 48,
       head: [["Yard", "Location", "Material", "Code", "Qty"]],
       body: rows.length > 0 ? rows : [["No stock found", "-", "-", "-", "-"]],
-      theme: "grid",
-      headStyles: { fillColor: [37, 99, 235] },
     });
+
+    addPdfFooter(doc);
 
     doc.save("CYMS_Stock_Summary_Report.pdf");
     showToast("Stock PDF downloaded successfully", "success");
@@ -435,10 +446,11 @@ export default function Reports() {
       : [];
 
     const doc = new jsPDF("l", "mm", "a4");
+
     addPdfHeader(doc, "Tools Report");
 
-    autoTable(doc, {
-      startY: 44,
+    addPdfTable(doc, {
+      startY: 48,
       head: [["Metric", "Count"]],
       body: [
         ["Total Tools", toolsCounts.total],
@@ -447,8 +459,6 @@ export default function Reports() {
         ["Maintenance", toolsCounts.maintenance],
         ["Retired", toolsCounts.retired],
       ],
-      theme: "grid",
-      headStyles: { fillColor: [37, 99, 235] },
     });
 
     const filteredToolsList = toolsList.filter((tool) => {
@@ -466,17 +476,18 @@ export default function Reports() {
       tool.currentHolder || tool.issuedTo || "-",
     ]);
 
-    doc.setFontSize(14);
-    doc.text("Tool Detailed List", 14, doc.lastAutoTable.finalY + 12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Tool Detailed List", 14, doc.lastAutoTable.finalY + 10);
 
-    autoTable(doc, {
-      startY: doc.lastAutoTable.finalY + 18,
+    addPdfTable(doc, {
+      startY: doc.lastAutoTable.finalY + 14,
       head: [["Tool Code", "Name", "Status", "Current Yard", "Location", "Holder"]],
       body: rows.length > 0 ? rows : [["No tools found", "-", "-", "-", "-", "-"]],
-      theme: "grid",
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [37, 99, 235] },
     });
+
+    addPdfFooter(doc);
 
     doc.save("CYMS_Tools_Report.pdf");
     showToast("Tools report downloaded successfully", "success");
@@ -484,6 +495,7 @@ export default function Reports() {
 
   function downloadMovementsPDF() {
     const doc = new jsPDF("l", "mm", "a4");
+
     addPdfHeader(doc, "Tool Movements Report");
 
     const filteredMovementPDFRows = movementRows.filter((row) => {
@@ -506,25 +518,33 @@ export default function Reports() {
       const from =
         row.type === "RETURN"
           ? row.issuedTo || row.holder || row.issuedToName || "User"
-          : [row.fromYard?.name, row.fromYard?.code, row.fromLocationCode].filter(Boolean).join(" / ") || "N/A";
+          : [row.fromYard?.name, row.fromYard?.code, row.fromLocationCode]
+              .filter(Boolean)
+              .join(" / ") || "N/A";
       const to =
         row.type === "ISSUE"
           ? row.issuedTo || row.holder || row.issuedToName || "User"
-          : [row.toYard?.name, row.toYard?.code, row.toLocationCode].filter(Boolean).join(" / ") || "N/A";
-      const holder = row.issuedTo || row.holder || row.issuedToName || row.performedBy?.fullName || "-";
+          : [row.toYard?.name, row.toYard?.code, row.toLocationCode]
+              .filter(Boolean)
+              .join(" / ") || "N/A";
+      const holder =
+        row.issuedTo ||
+        row.holder ||
+        row.issuedToName ||
+        row.performedBy?.fullName ||
+        "-";
       const date = row.createdAt ? new Date(row.createdAt).toLocaleString() : "N/A";
 
       return [row.type || "N/A", tool, from, to, holder, date];
     });
 
-    autoTable(doc, {
-      startY: 44,
+    addPdfTable(doc, {
+      startY: 48,
       head: [["Type", "Tool", "From", "To", "Holder / Issued To", "Date"]],
       body: rows.length > 0 ? rows : [["No movements found", "-", "-", "-", "-", "-"]],
-      theme: "grid",
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [37, 99, 235] },
     });
+
+    addPdfFooter(doc);
 
     doc.save("CYMS_Tool_Movements_Report.pdf");
     showToast("Movements PDF downloaded successfully", "success");
@@ -757,7 +777,7 @@ export default function Reports() {
             <button type="button" onClick={() => navigate("/tools")} style={getSecondaryButtonStyle(isMobile)}>
               View Tools
             </button>
-            <button type="button" onClick={() => setShowMovementsDetails(true)} style={getDetailsButtonStyle(isMobile)}>
+            <button type="button" onClick={() => setShowMovementsDetails(true)} style={getDetailsButtonStyle(isMobile)} className="details-btn">
               View Details
             </button>
           </div>
@@ -825,7 +845,7 @@ export default function Reports() {
             )}
 
             <div style={getModalFooterStyle(isMobile)}>
-              <button type="button" onClick={() => setShowStockDetails(false)} style={getDetailsButtonStyle(isMobile)}>
+              <button type="button" onClick={() => setShowStockDetails(false)} style={getDetailsButtonStyle(isMobile)} className="close-btn">
                 Close
               </button>
             </div>
@@ -878,7 +898,7 @@ export default function Reports() {
             )}
 
             <div style={getModalFooterStyle(isMobile)}>
-              <button type="button" onClick={() => setShowMovementsDetails(false)} style={getDetailsButtonStyle(isMobile)}>
+              <button type="button" onClick={() => setShowMovementsDetails(false)} style={getDetailsButtonStyle(isMobile)} className="close-btn">
                 Close
               </button>
             </div>
@@ -1303,13 +1323,19 @@ function MovementsTable({ rows, isMobile }) {
 }
 
 function getMovementFrom(row) {
-  if (row.type === "RETURN") return row.issuedTo || row.holder || row.issuedToName || "User";
-  return [row.fromYard?.name, row.fromYard?.code, row.fromLocationCode].filter(Boolean).join(" / ") || "N/A";
+  if (row.type === "RETURN") {
+    return row.issuedTo || row.holder || row.issuedToName || "User";
+  }
+
+  return row.fromYard?.name || row.fromYard?.code || row.fromLocationCode || "N/A";
 }
 
 function getMovementTo(row) {
-  if (row.type === "ISSUE") return row.issuedTo || row.holder || row.issuedToName || "User";
-  return [row.toYard?.name, row.toYard?.code, row.toLocationCode].filter(Boolean).join(" / ") || "N/A";
+  if (row.type === "ISSUE") {
+    return row.issuedTo || row.holder || row.issuedToName || "User";
+  }
+
+  return row.toYard?.name || row.toYard?.code || row.toLocationCode || "N/A";
 }
 
 function MobileInfo({ label, value }) {

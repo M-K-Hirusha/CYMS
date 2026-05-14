@@ -131,7 +131,7 @@ export default function Login() {
 
         <div style={footerStyle}>
           <span>Need help?</span>
-          <Link style={linkStyle} to="/unauthorized">
+          <Link style={linkStyle} to="/support">
             Contact support
           </Link>
         </div>
@@ -141,18 +141,21 @@ export default function Login() {
 }
 
 const pageStyle = {
-  minHeight: "100dvh",
+  height: "100vh",
+  minHeight: "100vh",
   width: "100%",
   maxWidth: "100%",
   minWidth: 0,
-  display: "grid",
-  placeItems: "center",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   padding: "clamp(16px, 4vw, 24px)",
   background:
     "radial-gradient(circle at top left, rgba(37,99,235,0.08), transparent 32%), radial-gradient(circle at bottom right, rgba(22,163,74,0.07), transparent 30%), #f8fafc",
   color: theme.text,
-  position: "relative",
-  overflowX: "hidden",
+  position: "fixed",
+  inset: 0,
+  overflow: "hidden",
   boxSizing: "border-box",
 };
 

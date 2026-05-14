@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import Select from "react-select";
 import {
   Activity,
   Building2,
@@ -21,6 +20,7 @@ import {
 import { useToast } from "../context/ToastContext";
 import ConfirmModal from "../components/ConfirmModal";
 import { theme } from "../styles/theme";
+import { clearMultipleCache } from "../utils/apiCache";
 
 const FILTER_OPTIONS = [
   { value: "ACTIVE", label: "Active Yards" },
@@ -41,7 +41,20 @@ export default function Yards() {
     currentRole === "SYSTEM_ADMIN" || currentRole === "HEAD_OFFICE_ADMIN";
   const canAddLocation =
     currentRole === "SYSTEM_ADMIN" || currentRole === "HEAD_OFFICE_ADMIN";
-  const canUpdateStatus = currentRole === "SYSTEM_ADMIN";
+  const canUpdateStatus =
+    currentRole === "SYSTEM_ADMIN";
+
+  function clearYardRelatedCache() {
+    clearMultipleCache([
+      "dashboard",
+      "yards",
+      "inventory",
+      "users",
+      "reports",
+      "mrs",
+      "tools",
+    ]);
+  }
 
   const actionMenuRef = useRef(null);
 
@@ -227,6 +240,7 @@ export default function Yards() {
     try {
       setCreating(true);
       await createYard(payload);
+      clearYardRelatedCache();
       await loadYards();
       closeCreateModal();
       showToast("Yard created successfully", "success");
@@ -261,6 +275,9 @@ export default function Yards() {
         name: locationForm.name.trim(),
         code: generateLocationCode(locationForm.code),
       });
+
+      clearYardRelatedCache();
+
       await loadYards();
       closeLocationModal();
       showToast("Location added successfully", "success");
@@ -291,6 +308,7 @@ export default function Yards() {
     try {
       setProcessingAction(true);
       await updateYardStatus(yard._id, nextStatus);
+      clearYardRelatedCache();
       await loadYards();
       setConfirmConfig(null);
       showToast(
@@ -391,16 +409,22 @@ export default function Yards() {
 
           <div>
             <label style={labelStyle}>Filter Yards</label>
-            <Select
-              isSearchable={false}
-              menuPortalTarget={document.body}
-              menuPosition="fixed"
-              menuShouldScrollIntoView={false}
-              options={FILTER_OPTIONS}
-              value={filter}
-              onChange={(selected) => setFilter(selected || FILTER_OPTIONS[0])}
-              styles={selectStyles}
-            />
+            <select
+              value={filter.value}
+              onChange={(e) =>
+                setFilter(
+                  FILTER_OPTIONS.find((option) => option.value === e.target.value) ||
+                    FILTER_OPTIONS[0]
+                )
+              }
+              style={inputStyle}
+            >
+              {FILTER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={getFilterButtonGroupStyle(isMobile)}>
@@ -625,12 +649,16 @@ export default function Yards() {
 
             <Field label="Yard Type">
               <select
-                style={inputStyle}
                 value={form.type}
                 disabled={creating}
                 onChange={(e) =>
-                  setForm((prev) => ({ ...prev, type: e.target.value, projectCode: "" }))
+                  setForm((prev) => ({
+                    ...prev,
+                    type: e.target.value,
+                    projectCode: e.target.value === "MAIN" ? "" : prev.projectCode,
+                  }))
                 }
+                style={selectStyle}
               >
                 <option value="MAIN">MAIN Yard</option>
                 <option value="SITE">SITE Yard</option>
@@ -1308,58 +1336,16 @@ const codeBadgeStyle = {
   whiteSpace: "nowrap",
 };
 
-const selectStyles = {
-  control: (base, state) => ({
-    ...base,
-    minHeight: 46,
-    backgroundColor: theme.surface,
-    borderColor: state.isFocused ? theme.primary : theme.border,
-    borderRadius: 10,
-    boxShadow: state.isFocused ? `0 0 0 1px ${theme.primary}` : "none",
-    cursor: "pointer",
-    "&:hover": {
-      borderColor: theme.primary,
-    },
-  }),
-  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-  menu: (base) => ({
-    ...base,
-    backgroundColor: theme.surface,
-    border: `1px solid ${theme.border}`,
-    borderRadius: 12,
-    overflow: "hidden",
-    zIndex: 50,
-    boxShadow: "0 20px 45px rgba(15,23,42,0.12)",
-  }),
-  menuList: (base) => ({
-    ...base,
-    padding: 6,
-  }),
-  option: (base, state) => ({
-    ...base,
-    backgroundColor: state.isSelected
-      ? theme.primary
-      : state.isFocused
-      ? theme.surfaceSoft
-      : theme.surface,
-    color: state.isSelected ? "#ffffff" : theme.text,
-    cursor: "pointer",
-    borderRadius: 8,
-    marginBottom: 3,
-    fontSize: 14,
-  }),
-  input: (base) => ({
-    ...base,
-    color: theme.text,
-  }),
-  placeholder: (base) => ({
-    ...base,
-    color: theme.muted,
-  }),
-  singleValue: (base) => ({
-    ...base,
-    color: theme.text,
-  }),
+const selectStyle = {
+  width: "100%",
+  minHeight: 46,
+  borderRadius: 10,
+  border: `1px solid ${theme.border}`,
+  background: theme.surface,
+  color: theme.text,
+  padding: "0 14px",
+  fontSize: 14,
+  outline: "none",
 };
 
 const viewLocationsButtonStyle = {

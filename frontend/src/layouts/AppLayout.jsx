@@ -61,6 +61,12 @@ export default function AppLayout() {
     };
   }, [sidebarOpen, isMobile]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [location.pathname]);
+
   const navItems = useMemo(() => {
     const items = [
       {
@@ -68,11 +74,17 @@ export default function AppLayout() {
         label: "Dashboard",
         icon: <LayoutDashboard size={18} />,
       },
-      {
-        to: "/reports",
-        label: "Reports",
-        icon: <BarChart3 size={18} />,
-      },
+
+      ...(role !== "SITE_STAFF"
+        ? [
+            {
+              to: "/reports",
+              label: "Reports",
+              icon: <BarChart3 size={18} />,
+            },
+          ]
+        : []),
+
       {
         to: "/mrs",
         label: "Material Requests",
@@ -95,7 +107,6 @@ export default function AppLayout() {
       },
     ];
 
-    // SYSTEM_ADMIN + HEAD_OFFICE_ADMIN
     if (role === "SYSTEM_ADMIN" || role === "HEAD_OFFICE_ADMIN") {
       items.push({
         to: "/yards",
@@ -110,7 +121,6 @@ export default function AppLayout() {
       });
     }
 
-    // SITE_ADMIN only
     if (role === "SITE_ADMIN") {
       items.push({
         to: "/yards",
@@ -394,7 +404,8 @@ const layoutStyle = {
   overflow: "hidden",
   background: theme.bg,
   color: theme.text,
-  position: "relative",
+  position: "fixed",
+  inset: 0,
   isolation: "isolate",
 };
 

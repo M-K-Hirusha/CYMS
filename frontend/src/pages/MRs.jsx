@@ -17,8 +17,13 @@ import { getMainYards } from "../services/yardApi";
 import { useToast } from "../context/ToastContext";
 
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import {
+  addPdfHeader,
+  addPdfFooter,
+  addPdfTable,
+} from "../utils/pdfUtils";
 import { theme } from "../styles/theme";
+import { clearMultipleCache } from "../utils/apiCache";
 
 export default function MRs() {
   const { showToast } = useToast();
@@ -74,6 +79,15 @@ export default function MRs() {
 
   const canApprove = role === "SYSTEM_ADMIN" || role === "HEAD_OFFICE_ADMIN";
   const canCreateMR = role === "SITE_ADMIN" || role === "SYSTEM_ADMIN";
+
+  function clearMRRelatedCache() {
+    clearMultipleCache([
+      "dashboard",
+      "mrs",
+      "inventory",
+      "reports",
+    ]);
+  }
 
   async function loadMRs() {
     try {
@@ -333,6 +347,8 @@ export default function MRs() {
         })),
       });
 
+      clearMRRelatedCache();
+
       await loadMRs();
 
       resetCreateForm();
@@ -399,6 +415,8 @@ export default function MRs() {
         approvalLines,
       });
 
+      clearMRRelatedCache();
+
       // instant UI update
       setMRs((prev) =>
         prev.map((mr) =>
@@ -450,6 +468,8 @@ export default function MRs() {
         reason: trimmedReason,
       });
 
+      clearMRRelatedCache();
+
       // instant UI update
       setMRs((prev) =>
         prev.map((mr) =>
@@ -490,23 +510,62 @@ export default function MRs() {
         mr.createdBy?.name ||
         "-";
 
-      const yard = mr.siteYard?.name || mr.siteYard?.code || mr.yard?.name || "-";
+      const yard =
+        mr.siteYard?.name ||
+        mr.siteYard?.code ||
+        mr.yard?.name ||
+        "-";
 
-      doc.setFontSize(18);
-      doc.text("Construction Yard Management System", 14, 18);
+      const rejectReason =
+        mr.rejectReason ||
+        mr.rejectionReason ||
+        mr.reason ||
+        mr.rejectedReason ||
+        "";
 
-      doc.setFontSize(14);
-      doc.text("Material Request Report", 14, 30);
+      const status = mr.status || "-";
 
+      addPdfHeader(doc, "Material Request Report");
+
+      let statusColor = [22, 163, 74];
+      if (status === "PENDING") statusColor = [245, 158, 11];
+      if (status === "REJECTED") statusColor = [239, 68, 68];
+
+      doc.setFillColor(...statusColor);
+      doc.roundedRect(14, 42, 42, 10, 3, 3, "F");
+
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.text(`MR Number: ${mr.mrNo || "-"}`, 14, 42);
-      doc.text(`Status: ${mr.status || "-"}`, 14, 49);
-      doc.text(`Requested By: ${requestedBy}`, 14, 56);
-      doc.text(`Yard: ${yard}`, 14, 63);
-      doc.text(`Generated Date: ${new Date().toLocaleString()}`, 14, 70);
+      doc.setTextColor(255, 255, 255);
+      doc.text(status, 23, 48.5);
 
-      autoTable(doc, {
-        startY: 82,
+      let y = 64;
+
+      const details = [
+        ["MR Number", mr.mrNo || "-"],
+        ["Requested By", requestedBy],
+        ["Yard", yard],
+        ["Generated Date", new Date().toLocaleString()],
+      ];
+
+      if (status === "REJECTED" && rejectReason) {
+        details.splice(1, 0, ["Reject Reason", rejectReason]);
+      }
+
+      details.forEach(([label, value]) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(15, 23, 42);
+        doc.text(`${label}:`, 18, y);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(String(value), 54, y);
+
+        y += 8;
+      });
+
+      addPdfTable(doc, {
+        startY: y + 6,
         head: [["Material", "Code", "Requested Qty", "Approved Qty", "Unit"]],
         body:
           mr.items?.map((item) => [
@@ -516,13 +575,9 @@ export default function MRs() {
             item.approvedQty != null ? item.approvedQty : "-",
             item.material?.unit || "-",
           ]) || [],
-        styles: {
-          fontSize: 9,
-        },
-        headStyles: {
-          fillColor: [37, 99, 235],
-        },
       });
+
+      addPdfFooter(doc);
 
       doc.save(`${mr.mrNo || "material-request"}.pdf`);
       showToast("MR PDF downloaded successfully", "success");
@@ -531,7 +586,6 @@ export default function MRs() {
       showToast("Failed to download MR PDF", "error");
     }
   }
-
 
   function openActionMenuForMR(mrId) {
     setHoveredAction(null);
@@ -1112,6 +1166,7 @@ export default function MRs() {
               type="button"
               onClick={() => setViewModalMR(null)}
               style={getSecondaryButtonStyle(isMobile)}
+              className="close-btn"
             >
               Close
             </button>

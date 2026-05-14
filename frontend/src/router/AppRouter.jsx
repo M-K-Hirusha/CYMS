@@ -12,12 +12,14 @@ import Inventory from "../pages/Inventory";
 import Yards from "../pages/Yards";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
+import Support from "../pages/Support";
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/support" element={<Support />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
         <Route element={<AppLayout />}>
@@ -35,7 +37,9 @@ export default function AppRouter() {
           <Route
             path="/reports"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+               allowedRoles={["SYSTEM_ADMIN", "HEAD_OFFICE_ADMIN", "SITE_ADMIN"]}
+               >
                 <Reports />
               </ProtectedRoute>
             }

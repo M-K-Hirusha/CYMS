@@ -14,6 +14,7 @@ const historySchema = new mongoose.Schema(
   { _id: false }
 );
 
+// MCR = Material Creation Request
 const materialCreationRequestSchema = new mongoose.Schema(
   {
     mcrNo: { type: String, unique: true, index: true },
