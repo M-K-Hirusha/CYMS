@@ -5,23 +5,20 @@
 A full-stack web-based system for managing construction yard materials, tools, inventory, material requests, users, roles, reports, and multi-yard operations.
 
 <p align="center">
-  <img src="frontend/src/assets/cyms-logo.png" alt="CYMS Logo" width="260"/>
+  <img src="frontend/src/assets/cyms-logo.png" alt="CYMS Logo" width="300"/>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React"/>
-  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite"/>
-  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"/>
-  <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js"/>
-  <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
-  <img src="https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white" alt="Mongoose"/>
-  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT"/>
-  <img src="https://img.shields.io/badge/Recharts-2563EB?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Recharts"/>
-  <img src="https://img.shields.io/badge/jsPDF-EF4444?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="jsPDF"/>
-  <img src="https://img.shields.io/badge/XLSX-16A34A?style=for-the-badge&logo=microsoftexcel&logoColor=white" alt="XLSX"/>
-  <img src="https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white" alt="Jest"/>
-  <img src="https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest"/>
-  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
+  <img src="https://skillicons.dev/icons?i=react,vite,nodejs,express,mongodb,js,git,github,vscode" alt="Technology Icons"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/JWT-Authentication-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT"/>
+  <img src="https://img.shields.io/badge/Recharts-Analytics-2563EB?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Recharts"/>
+  <img src="https://img.shields.io/badge/jsPDF-PDF_Reports-EF4444?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="jsPDF"/>
+  <img src="https://img.shields.io/badge/XLSX-Excel_Export-16A34A?style=for-the-badge&logo=microsoftexcel&logoColor=white" alt="XLSX"/>
+  <img src="https://img.shields.io/badge/Jest-Backend_Testing-C21325?style=for-the-badge&logo=jest&logoColor=white" alt="Jest"/>
+  <img src="https://img.shields.io/badge/Vitest-Frontend_Testing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest"/>
 </p>
 
 ---
