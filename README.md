@@ -1,537 +1,617 @@
-# CYMS – Construction Yard Management System
+# CYMS
 
-Final Year Project
-NSBM Green University
+**Construction Yard Management System**
 
----
+A full-stack web-based system for managing construction yard materials, tools, inventory, material requests, users, roles, reports, and multi-yard operations.
 
-# 📌 Project Overview
+<p align="center">
+  <img src="frontend/src/assets/cyms-logo.png" alt="CYMS Logo" width="260"/>
+</p>
 
-CYMS (Construction Yard Management System) is a full-stack MERN web application developed to manage construction yard operations across multiple locations with secure inventory control, material tracking, and role-based operational workflows.
-
-The system is designed to improve inventory visibility, reduce manual stock handling errors, and provide centralized control over material movement between MAIN yards and SITE yards.
-
-The application supports:
-
-* Multi-yard inventory management
-* Material and equipment tracking
-* Material Request (MR) workflows
-* Stock Receive / Issue / Transfer operations
-* Yard and location management
-* Role-based access control (RBAC)
-* Secure JWT authentication
-* Transaction-safe stock updates
-* Audit trail logging
-* Responsive admin dashboard interface
-* Real-time operational summaries and reporting
-
----
-
-# 🏗 System Architecture
-
-The project follows a clean backend-first architecture using modular service-based development principles.
-
-## Architecture Highlights
-
-* RESTful API design
-* Modular Express backend
-* React frontend with reusable UI components
-* Middleware-based authentication and authorization
-* MongoDB transactional operations using Mongoose sessions
-* Service-layer business logic separation
-* Reusable frontend API services
-* Environment-based configuration validation
-* Responsive dashboard-driven UI
+<p align="center">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React"/>
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite"/>
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"/>
+  <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js"/>
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
+  <img src="https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white" alt="Mongoose"/>
+  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT"/>
+  <img src="https://img.shields.io/badge/Recharts-2563EB?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Recharts"/>
+  <img src="https://img.shields.io/badge/jsPDF-EF4444?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="jsPDF"/>
+  <img src="https://img.shields.io/badge/XLSX-16A34A?style=for-the-badge&logo=microsoftexcel&logoColor=white" alt="XLSX"/>
+  <img src="https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white" alt="Jest"/>
+  <img src="https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest"/>
+  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
+</p>
 
 ---
 
-# ⚙️ Tech Stack
+## Project Overview
 
-## Frontend
+CYMS is a Construction Yard Management System developed as a final-year computing project. The system is designed to support construction companies that manage materials, tools, stock movements, material requests, users, and site yard operations across multiple locations.
 
-* React.js (Vite)
-* React Router DOM
-* Axios
-* Recharts
-* Lucide React Icons
-* Context API
-* Custom responsive admin UI system
+The project was developed with reference to the practical construction yard management needs of **DKS Builders**. The system focuses on improving stock visibility, reducing manual record errors, speeding up material request approvals, improving accountability, and supporting better operational decision-making through dashboards and reports.
 
-## Backend
+CYMS provides a centralized digital platform for:
 
-* Node.js
-* Express.js
-* MongoDB
-* Mongoose
-* JWT Authentication
-* bcrypt password hashing
-* Mongoose Transactions
+- Multi-yard inventory management
+- Material and tool tracking
+- Stock receiving, issuing, and transferring
+- Material request creation and approval
+- Yard and location management
+- User and role management
+- Dashboard summaries and analytics
+- PDF and Excel report exports
+- Role-based access control
+- Responsive admin panel interface
 
----
-
-## Additional Libraries & Packages
-
-### Frontend Libraries
-
-* Recharts → Dashboard charts and analytics
-* jsPDF → PDF report generation
-* jspdf-autotable → Dynamic PDF tables
-* XLSX → Excel report export
-* Lucide React → Icon system
-* React Select → Advanced dropdown selection
-* Axios → API communication
-
-### Backend Libraries
-
-* jsonwebtoken → JWT authentication
-* bcryptjs → Password hashing
-* mongoose → MongoDB object modeling
-* dotenv → Environment variable management
-* cors → Cross-origin API handling
-* express-async-handler → Async error handling
+This repository contains the frontend, backend, testing files, and realistic demonstration seed data used for academic project demonstration.
 
 ---
 
-# 🔐 Role-Based Access Control (RBAC)
+## Problem Statement
 
-The system currently supports four user roles:
+Construction companies often manage yard materials, tools, and stock records using manual files, spreadsheets, phone calls, or informal communication. This creates several practical problems:
 
-| Role              | Access Scope                     |
-| ----------------- | -------------------------------- |
-| SYSTEM_ADMIN      | Full system access               |
-| HEAD_OFFICE_ADMIN | MAIN yard operational management |
-| SITE_ADMIN        | SITE yard management             |
-| SITE_STAFF        | Limited operational access       |
+- Stock records can become inaccurate or outdated.
+- Head office users may not have clear visibility of materials available at each yard.
+- Site teams may face delays when requesting materials.
+- Tool issuing, returning, and maintenance records can be difficult to track.
+- Manual reporting takes time and can lead to mistakes.
+- Different users need different access permissions, but manual systems do not control this properly.
 
-RBAC is implemented using:
-
-* JWT authentication middleware
-* Protected frontend routes
-* Backend authorization middleware
-* Yard-scoped access filtering
-* Role-based UI rendering
+CYMS addresses these problems by providing one centralized platform for construction yard operations.
 
 ---
 
-# 🏢 Yard Management Structure
+## Proposed Solution
 
-The system supports two yard types:
+CYMS solves the above problems through a full-stack digital workflow. System users can manage yards, materials, tools, inventory records, material requests, users, and reports from one platform.
 
-## MAIN Yard
+The system supports different user roles, so each user only accesses the functions they are allowed to use. It also records stock movements and tool movements, which improves accountability and traceability.
 
-Central warehouse or headquarters inventory location.
+The result is a practical construction yard management platform that supports:
 
-Default Location:
-
-* MAIN_STORE
-
-## SITE Yard
-
-Project-specific operational yard.
-
-Default Location:
-
-* SITE_STORE
-
-Each yard supports:
-
-* Multiple internal storage locations
-* Active/inactive status management
-* Project-based identification
-* Location-level stock control
+- Better stock accuracy
+- Faster request handling
+- Clearer operational visibility
+- Improved user accountability
+- Stronger reporting and decision-making
+- More organized construction yard workflows
 
 ---
 
-# 📦 Inventory Architecture
+## Key Features
 
-The inventory system is built using two core models:
+### User and Role Management
 
-## Stock
+- Create and manage system users
+- Activate and deactivate user accounts
+- Assign users to correct roles
+- Assign site users to specific site yards
+- Assign head office users to main yards
+- Enforce role-based access control
 
-Maintains current material balance per yard and location.
+### Yard Management
 
-Tracks:
+- Create and manage main yards and site yards
+- Support yard-specific storage locations
+- Activate and deactivate yards
+- Maintain separate yard types for main warehouse and construction sites
 
-* Material quantity
-* Yard ownership
-* Location assignment
+### Material Management
 
-## StockMovement
+- Create, update, and manage construction materials
+- Store material name, code, unit, and category
+- Prevent duplicate material codes
+- Support material activation status
 
-Maintains audit history of all inventory operations.
+### Material Creation Requests
 
-Tracks:
+- Allow site users to request new material creation
+- Support pending, approved, and rejected statuses
+- Maintain request history and decision notes
+- Help control material records before adding them to the system
 
-* Receive operations
-* Issue operations
-* Transfer operations
-* MR dispatch movements
-* User activity history
+### Inventory Management
 
----
+- Track stock by material, yard, and location
+- Receive stock into yards
+- Issue stock from yards
+- Transfer stock between yards
+- Prevent negative stock quantity
+- Record stock movement history
 
-# 🔄 Supported Inventory Operations
+### Material Request Management
 
-The system currently supports:
+- Site users can create material requests
+- Head office users can approve or reject requests
+- Approved quantities can be entered during approval
+- Rejection reason is required for rejected requests
+- Material request history is maintained
 
-## Receive Stock
+### Tool Management
 
-Add material quantities into a yard location.
+- Create and manage construction tools
+- Track tool status:
+  - Available
+  - Issued
+  - Maintenance
+  - Retired
+- Issue tools to holders
+- Return tools to yard locations
+- Transfer tools between yards
+- Maintain tool movement history
 
-## Issue Stock
+### Dashboard
 
-Remove material quantities from a yard location.
+- View system overview cards
+- Display total tools
+- Display total material requests
+- Display total stock quantity
+- Display pending material requests
+- Show material request summary
+- Show tools summary
+- Show stock summary
+- Show action checklist
 
-## Transfer Stock
+### Reports and Analytics
 
-Transfer inventory between yards and locations.
+- View report summary cards
+- Display charts for tool status and material request status
+- Download PDF reports
+- Export stock data to Excel
+- Filter reports using date range and yard filters
+- Support operational decision-making
 
-## Material Request Dispatch
+### Responsive User Interface
 
-Dispatch materials from MAIN yards to SITE yards through MR approval workflow.
-
----
-
-# 🛡 Inventory Protection Features
-
-All stock operations are:
-
-* Transaction-safe
-* Negative-stock protected
-* Location-validated
-* Role-restricted
-* Audit logged
-* Atomic-operation protected
-
-Mongoose session transactions are used to ensure inventory consistency.
-
----
-
-# 📋 Material Request (MR) Workflow
-
-The Material Request system supports operational communication between SITE yards and MAIN yards.
-
-## Workflow
-
-1. SITE_ADMIN creates MR
-2. HEAD_OFFICE_ADMIN or SYSTEM_ADMIN reviews request
-3. MR can be:
-
-   * Approved
-   * Rejected
-4. Approved materials automatically update inventory
-5. Stock movement audit logs are created
-
-Features include:
-
-* Multi-item MR creation
-* Approval quantity editing
-* Dispatch MAIN yard selection
-* Rejection reasons
-* Approval history tracking
-* PDF report generation
-
----
-
-# 📊 Reporting System
-
-The reporting module provides operational analytics and downloadable reports.
-
-## Available Reports
-
-* Tool reports
-* Material Request reports
-* Stock reports
-* Stock movement reports
-
-## Export Formats
-
-* PDF
-* Excel (.xlsx)
-
-## Dashboard Analytics
-
-* Tool status summaries
-* MR approval summaries
-* Stock quantity summaries
-* Inventory activity tracking
+- Desktop admin panel layout
+- Mobile-friendly sidebar drawer
+- Responsive dashboard cards
+- Responsive report layout
+- Mobile-friendly forms, tables, and action sections
 
 ---
 
-# 🧰 Tool Management Module
+## User Roles
 
-The tool management system supports equipment lifecycle tracking.
-
-## Tool Statuses
-
-* AVAILABLE
-* ISSUED
-* MAINTENANCE
-* RETIRED
-
-## Features
-
-* Tool issuance
-* Tool return
-* Tool transfer
-* Maintenance tracking
-* Tool movement history
-* Yard assignment tracking
+| Role | Main Responsibility |
+|---|---|
+| `SYSTEM_ADMIN` | Full system access, user management, yard management, materials, inventory, tools, requests, and reports |
+| `HEAD_OFFICE_ADMIN` | Main yard operations, material request approvals, stock control, reporting, and tool management |
+| `SITE_ADMIN` | Assigned site yard operations, material requests, stock issuing, and site-level tool/material visibility |
+| `SITE_STAFF` | Limited access for assigned site yard operations and material request-related tasks |
 
 ---
 
-# 🎨 Frontend UI System
+## System Workflow
 
-The frontend uses a fully custom responsive admin interface.
-
-## UI Features
-
-* Responsive layouts
-* Mobile-friendly dashboards
-* Reusable card system
-* Consistent dark/light theme styling
-* Toast notification system
-* Modal-based workflows
-* KPI summary cards
-* Dynamic filtering and pagination
-* Reusable action dropdown system
-
----
-
-# 📁 Project Structure
-
-## Frontend
-
-```bash
-frontend/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── context/
-│   ├── layouts/
-│   ├── pages/
-│   ├── router/
-│   ├── services/
-│   ├── styles/
-│   └── utils/
-```
-
-## Backend
-
-```bash
-backend/
-├── src/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── services/
-│   ├── utils/
-│   └── config/
+```text
+System Admin
+  |
+  |-- Creates users, roles, yards, and base records
+  |
+Head Office Admin
+  |
+  |-- Manages materials, tools, stock, reports, and approvals
+  |
+Site Admin / Site Staff
+  |
+  |-- Creates material requests for assigned site yard
+  |
+  |-- Views assigned yard information
+  |
+Head Office Admin
+  |
+  |-- Reviews and approves or rejects material requests
+  |
+  |-- Stock movement is recorded
+  |
+Dashboard and Reports
+  |
+  |-- Shows summaries, charts, PDF exports, and Excel exports
 ```
 
 ---
 
-# 🚀 Implemented Modules
+## Technology Stack
 
-## Authentication System
-
-* JWT login
-* Password hashing
-* Protected routes
-* Session persistence
-
-## User Management
-
-* Role assignment
-* Yard assignment
-* RBAC enforcement
-
-## Yard Management
-
-* MAIN/SITE yard structure
-* Internal locations
-* Yard activation system
-
-## Material Management
-
-* Material CRUD operations
-* Dynamic unit support
-
-## Inventory Management
-
-* Receive/Issue/Transfer
-* Transaction-safe stock operations
-
-## Tool Management
-
-* Tool lifecycle tracking
-* Equipment movement history
-
-## Material Request System
-
-* Approval/rejection workflow
-* Dispatch management
-
-## Reporting Dashboard
-
-* KPI analytics
-* Exportable reports
+| Layer | Technologies |
+|---|---|
+| Frontend | React, Vite, React Router DOM, Context API |
+| Backend | Node.js, Express.js |
+| Database | MongoDB, Mongoose |
+| Authentication | JWT Authentication |
+| Access Control | Role-Based Access Control |
+| Charts | Recharts |
+| PDF Export | jsPDF, jspdf-autotable |
+| Excel Export | XLSX |
+| Icons | Lucide React |
+| Testing | Jest, Supertest, Vitest, React Testing Library |
+| Development Tools | VS Code, Git, GitHub, MongoDB Atlas |
 
 ---
 
-# 📱 Responsive Design Support
+## Architecture Overview
 
-The system is optimized for:
-
-* Desktop devices
-* Tablets
-* Mobile devices
-
-Responsive layouts include:
-
-* Adaptive dashboard grids
-* Mobile action cards
-* Responsive modal layouts
-* Flexible table rendering
-* Mobile-friendly navigation
-
----
-
-# 🔒 Security Features
-
-The system includes:
-
-* JWT authentication
-* Password hashing with bcrypt
-* Protected API routes
-* Role-based authorization
-* Transaction-safe inventory updates
-* Unauthorized route protection
-* Input validation
-* Location validation
-* Negative stock prevention
-
----
-
-# 🧪 Testing Status
-
-The following modules have been tested successfully:
-
-* Authentication APIs
-* RBAC middleware
-* Yard operations
-* Inventory transactions
-* Material Request workflows
-* Tool operations
-* Reporting APIs
-* Frontend route protection
-
-Testing tools used:
-
-* Postman
-* Browser integration testing
-* Transaction validation testing
+```text
+React + Vite Frontend
+  |
+  |-- Login and protected routes
+  |-- Role-based navigation
+  |-- Dashboard, reports, forms, tables, and modals
+  |
+Express.js / Node.js Backend
+  |
+  |-- Authentication APIs
+  |-- User APIs
+  |-- Yard APIs
+  |-- Material APIs
+  |-- Inventory APIs
+  |-- Material Request APIs
+  |-- Material Creation Request APIs
+  |-- Tool APIs
+  |-- Report APIs
+  |
+MongoDB + Mongoose
+  |
+  |-- Users
+  |-- Yards
+  |-- Materials
+  |-- Stocks
+  |-- Stock Movements
+  |-- Material Requests
+  |-- Material Creation Requests
+  |-- Tools
+  |-- Tool Movements
+  |-- Counters
+```
 
 ---
 
-# 🎯 Current Development Status
+## Main Folder Structure
 
-The system currently includes:
-
-✅ Authentication System
-✅ RBAC System
-✅ Yard Management
-✅ Material Management
-✅ Inventory Management
-✅ Tool Management
-✅ Material Request Workflow
-✅ Reporting Dashboard
-✅ Responsive Frontend UI
-✅ Transaction-safe Stock Operations
+```text
+CYMS/
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   ├── app.js
+│   │   ├── server.js
+│   │   └── seedRealisticDemoData.js
+│   ├── health.test.js
+│   ├── package.json
+│   └── README.md
+│
+├── frontend/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── styles/
+│   │   ├── utils/
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── frontend.test.jsx
+│   ├── package.json
+│   └── README.md
+│
+├── .gitignore
+└── README.md
+```
 
 ---
 
-# 🚀 Future Improvements
+## Database Models
 
-Planned future enhancements include:
-
-* Email notifications
-* Barcode/QR code support
-* Real-time WebSocket updates
-* Advanced analytics dashboard
-* Cloud deployment
-* Mobile application
-* File attachment support
-* Purchase order integration
-* Supplier management
+| Model | Purpose |
+|---|---|
+| User | Stores user accounts, roles, assigned yards, managed yards, and account status |
+| Yard | Stores main yards, site yards, project codes, locations, and status |
+| Material | Stores material name, code, unit, category, and status |
+| Stock | Stores stock quantity by yard, location, and material |
+| StockMovement | Stores receive, issue, transfer, adjustment, and material dispatch history |
+| MR | Stores material requests, requested items, approval status, and request history |
+| MaterialCreationRequest | Stores requests for creating new materials |
+| Tool | Stores tool details, status, current yard, location, and holder |
+| ToolMovement | Stores tool issue, return, transfer, and status-change history |
+| Counter | Stores automatic sequence numbers for system documents |
 
 ---
 
-# ⚡ Installation Guide
+## Testing Summary
 
-## Clone Repository
+CYMS includes automated and manual testing evidence.
+
+### Backend Testing
+
+Backend API tests were created using Jest and Supertest.
+
+Test coverage includes:
+
+- Health API
+- Protected routes
+- Authentication validation
+- Unauthorized access blocking
+- Invalid route handling
+- Invalid request body validation
+- HTTP method validation
+- API security and error handling
+
+Backend automated test result:
+
+```text
+Test Suites: 1 passed
+Tests: 50 passed
+```
+
+### Frontend Testing
+
+Frontend component tests were created using Vitest and React Testing Library.
+
+Test coverage includes:
+
+- Login page rendering
+- Email and password input fields
+- Login button
+- Dashboard title
+- Dashboard summary cards
+- Main navigation links
+- Inventory form fields
+- Reports page title
+- Report download buttons
+- Tools page title
+- Tool action buttons
+
+Frontend automated test result:
+
+```text
+Test Files: 1 passed
+Tests: 20 passed
+```
+
+### Build Validation
+
+The frontend production build was tested successfully using:
+
+```bash
+npm run build
+```
+
+---
+
+## Demo Data
+
+The repository includes a realistic demonstration seed script:
+
+```text
+backend/src/seedRealisticDemoData.js
+```
+
+This script creates sample academic demonstration data only. It does not contain real company confidential data.
+
+The seed data includes:
+
+- System administrator account
+- Head office administrator accounts
+- Site administrator accounts
+- Site staff accounts
+- Main yards
+- Site yards
+- Construction materials
+- Stock records
+- Material requests
+- Material creation requests
+- Tools
+- Stock movement history
+- Tool movement history
+
+To run the seed script:
+
+```bash
+cd backend
+node src/seedRealisticDemoData.js
+```
+
+---
+
+## How to Run Locally
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/M-K-Hirusha/CYMS.git
+cd CYMS
 ```
 
-## Install Backend Dependencies
+### 2. Backend Setup
 
 ```bash
 cd backend
 npm install
 ```
 
-## Install Frontend Dependencies
+Create a `.env` file inside the backend folder:
+
+```env
+PORT=5000
+NODE_ENV=development
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_long_random_secret
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174
+BODY_LIMIT=100kb
+RATE_LIMIT_WINDOW_MIN=15
+RATE_LIMIT_MAX=300
+```
+
+Start the backend:
+
+```bash
+npm run dev
+```
+
+Backend URL:
+
+```text
+http://localhost:5000
+```
+
+Health check:
+
+```text
+http://localhost:5000/api/health
+```
+
+### 3. Frontend Setup
+
+Open another terminal:
 
 ```bash
 cd frontend
 npm install
 ```
 
-## Run Backend
-
-```bash
-npm run dev
-```
-
-## Run Frontend
-
-```bash
-npm run dev
-```
-
----
-
-# 🔧 Environment Variables
-
-## Backend `.env`
-
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection
-JWT_SECRET=your_secret_key
-```
-
-## Frontend `.env`
+Create a `.env` file inside the frontend folder:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000
 ```
 
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+Frontend URL:
+
+```text
+http://localhost:5173
+```
+
 ---
 
-# 👨‍💻 Developer
+## Common Commands
 
-## Hirusha Nilupul
+### Backend
 
-Final Year Undergraduate
-NSBM Green University
+```bash
+cd backend
+npm install
+npm run dev
+npm test
+node src/seedRealisticDemoData.js
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+npm run build
+npm test
+```
 
 ---
 
-## 📄 License
+## Security Notes
+
+- `.env` files are ignored and must not be pushed to GitHub.
+- MongoDB connection strings must be kept private.
+- JWT secrets must be kept private.
+- Demo login credentials are for academic demonstration only.
+- Passwords are stored as hashed values in the database.
+- Role-based access control is used to restrict user actions.
+- Protected API routes require valid JWT authentication.
+
+---
+
+## Academic and Project Notes
+
+CYMS was developed as an academic final-year project for the PUSL3190 Computing Project module. The system demonstrates:
+
+- Full-stack MERN application development
+- Secure authentication and role-based access control
+- Practical construction yard workflow digitization
+- Multi-yard stock and tool management
+- Material request approval workflows
+- Dashboard and reporting implementation
+- Automated backend and frontend testing
+- Responsive web interface development
+- Git and GitHub-based version control
+
+The project should be evaluated as a completed academic prototype and practical web-based solution for construction yard management.
+
+---
+
+## Limitations
+
+Although CYMS provides the main features required for a construction yard management system, some limitations remain:
+
+- The system is currently tested mainly in a local development environment.
+- It has not yet been deployed as a production cloud application.
+- Long-term real company usage testing has not yet been completed.
+- Advanced notification features are not fully implemented.
+- Future versions can include barcode/QR scanning, mobile app support, advanced audit dashboards, and automated alerts.
+
+---
+
+## Future Improvements
+
+Future development can improve CYMS by adding:
+
+- Cloud deployment with production configuration
+- Email or SMS notifications
+- QR code or barcode scanning for tools and materials
+- Advanced audit log dashboard
+- Supplier and purchase order management
+- More detailed analytics and forecasting
+- Mobile-first site staff interface
+- Backup and restore tools
+- CI/CD pipeline for automated testing and deployment
+
+---
+
+## Author and Project Information
+
+| Item | Details |
+|---|---|
+| Project Name | CYMS |
+| Full Name | Construction Yard Management System |
+| Project Type | Final-Year Academic Computing Project |
+| Institution | NSBM Green University |
+| Module | PUSL3190 Computing Project |
+| Repository | https://github.com/M-K-Hirusha/CYMS |
+| Primary Users | Construction company administrators, head office users, site admins, and site staff |
+| Main Objective | To improve construction yard stock visibility, material request handling, tool tracking, reporting, and role-based operational control |
+
+---
+
+## Repository
+
+```text
+https://github.com/M-K-Hirusha/CYMS
+```
+
+Clone command:
+
+```bash
+git clone https://github.com/M-K-Hirusha/CYMS.git
+```
+
+---
+
+## License
 
 This project was developed as part of a Final Year Software Engineering project in collaboration with a real-world construction company.
 
