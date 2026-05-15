@@ -13,12 +13,10 @@ A full-stack web-based system for managing construction yard materials, tools, i
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/JWT-Authentication-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT"/>
-  <img src="https://img.shields.io/badge/Recharts-Analytics-2563EB?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Recharts"/>
-  <img src="https://img.shields.io/badge/jsPDF-PDF_Reports-EF4444?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="jsPDF"/>
-  <img src="https://img.shields.io/badge/XLSX-Excel_Export-16A34A?style=for-the-badge&logo=microsoftexcel&logoColor=white" alt="XLSX"/>
-  <img src="https://img.shields.io/badge/Jest-Backend_Testing-C21325?style=for-the-badge&logo=jest&logoColor=white" alt="Jest"/>
-  <img src="https://img.shields.io/badge/Vitest-Frontend_Testing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest"/>
+  <img src="https://img.shields.io/badge/JWT-Authentication-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT Authentication"/>
+  <img src="https://img.shields.io/badge/Recharts-Analytics-2563EB?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Recharts Analytics"/>
+  <img src="https://img.shields.io/badge/PDF_Reports-jsPDF-EF4444?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="PDF Reports"/>
+  <img src="https://img.shields.io/badge/Excel_Export-XLSX-16A34A?style=for-the-badge&logo=microsoftexcel&logoColor=white" alt="Excel Export"/>
 </p>
 
 ---
