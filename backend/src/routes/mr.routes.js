@@ -9,7 +9,7 @@ const mrController = require("../controllers/mrcontroller");
 router.post(
   "/",
   protect,
-  authorizeRoles("SITE_ADMIN"),
+  authorizeRoles("SITE_ADMIN", "SITE_STAFF"),
   mrController.createMR
 );
 

@@ -9,6 +9,9 @@ const signToken = (user) => {
       sub: user._id.toString(),
       role: user.role,
       assignedYard: user.assignedYard ? user.assignedYard.toString() : null,
+      managedMainYards: Array.isArray(user.managedMainYards)
+        ? user.managedMainYards.map((id) => id.toString())
+        : [],
     },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
@@ -42,7 +45,7 @@ exports.register = async (req, res) => {
       return res.status(409).json({ message: "Email already registered." });
     }
 
-    // ✅ Bootstrap rule:
+    // Bootstrap rule:
     // If this is the first user in the system, allow SYSTEM_ADMIN creation.
    const userCount = await User.countDocuments();
 

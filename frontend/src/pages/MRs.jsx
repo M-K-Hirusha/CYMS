@@ -78,7 +78,7 @@ export default function MRs() {
   const role = localStorage.getItem("role");
 
   const canApprove = role === "SYSTEM_ADMIN" || role === "HEAD_OFFICE_ADMIN";
-  const canCreateMR = role === "SITE_ADMIN" || role === "SYSTEM_ADMIN";
+  const canCreateMR = role === "SITE_ADMIN" || role === "SITE_STAFF";
 
   function clearMRRelatedCache() {
     clearMultipleCache([
